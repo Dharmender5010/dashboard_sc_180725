@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Sales Follow-Up Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- SweetAlert2 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <!-- Google Sign-In -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+            colors: {
+              'brand-primary': '#4f46e5', // indigo-600
+              'brand-secondary': '#6366f1', // indigo-500
+              'brand-light': '#eef2ff', // indigo-50
+              'brand-dark': '#3730a3', // indigo-800
+              'status-success': '#10b981', // emerald-500
+              'status-danger': '#ef4444', // red-500
+              'status-info': '#3b82f6', // blue-500
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      @keyframes animateShapes {
+        0% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 0.8;
+            border-radius: 0;
+        }
+        100% {
+            transform: translateY(-100vh) rotate(720deg);
+            opacity: 0;
+            border-radius: 50%;
+        }
+      }
+
+      .animated-shapes-container {
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          z-index: -1;
+          background-color: #f3f4f6; /* bg-gray-100 */
+          overflow: hidden;
+      }
+
+      .animated-shapes-container li {
+          position: absolute;
+          display: block;
+          list-style: none;
+          width: 20px;
+          height: 20px;
+          background: rgba(79, 70, 229, 0.15); /* brand-primary with opacity */
+          animation-name: animateShapes;
+          animation-timing-function: linear;
+          animation-iteration-count: infinite;
+          bottom: -150px;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-dom/": "https://esm.sh/react-dom@18.2.0/",
+    "recharts": "https://esm.sh/recharts@2.12.7?external=react,react-dom",
+    "framer-motion": "https://esm.sh/framer-motion@11.2.10?external=react",
+    "path": "https://esm.sh/path@0.12.7",
+    "vite": "https://esm.sh/vite@5.2.12",
+    "react-joyride": "https://esm.sh/react-joyride@2.8.2?external=react,react-dom,styled-components",
+    "styled-components": "https://esm.sh/styled-components@6.1.11?external=react"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
