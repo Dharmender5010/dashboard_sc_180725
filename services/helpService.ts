@@ -197,7 +197,7 @@ function handleVerifyOtp(payload) {
 import { HelpTicket } from '../types';
 
 // --- CONFIGURATION ---
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby7jCjieMPMQos9EFSCoENqkQyUcolmg3kXS5AM99c_xXbj8Yro83Vcs7GG2fOr1FGa/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz3er2jaKwzaGCXGPm4y1WfLxXCHgNjY_98XtbaJYMJcu9XSkxkt3gsEtXz7OxgETxS/exec';
 
 export const DEVELOPER_EMAIL = "mis@bonhoeffermachines.in";
 
