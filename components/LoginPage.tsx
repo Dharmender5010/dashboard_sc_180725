@@ -18,16 +18,6 @@ interface LoginPageProps {
   onStartTour: () => void;
 }
 
-interface CredentialResponse {
-    credential?: string;
-}
-
-interface DecodedJwt {
-    email: string;
-    name: string;
-    picture: string;
-}
-
 const containerVariants: Variants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
@@ -50,10 +40,21 @@ const itemVariants: Variants = {
     }
 };
 
+const GoogleIcon: React.FC = () => (
+    <svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <g fill="none" fillRule="evenodd">
+            <path d="M17.64 9.2045c0-.6381-.0573-1.2518-.1636-1.8409H9v3.4818h4.8441c-.2086 1.125-.8441 2.0782-1.7777 2.7218v2.2591h2.9091c1.7018-1.5668 2.6836-3.8736 2.6836-6.6218z" fill="#4285F4"/>
+            <path d="M9 18c2.43 0 4.4673-.8068 5.9564-2.1818l-2.9091-2.2591c-.8068.5409-1.8409.8618-3.0473.8618-2.3455 0-4.3291-1.5818-5.0359-3.7159H.9577v2.3318C2.4382 16.1455 5.4273 18 9 18z" fill="#34A853"/>
+            <path d="M3.9641 10.71c-.1818-.5409-.2864-1.125-.2864-1.71s.1045-1.1691.2864-1.71V4.9582H.9577C.3477 6.1718 0 7.5455 0 9s.3477 2.8282.9577 4.0418L3.9641 10.71z" fill="#FBBC05"/>
+            <path d="M9 3.5455c1.3227 0 2.5182.4545 3.4409 1.3455l2.5818-2.5818C13.4636.8918 11.4264 0 9 0 5.4273 0 2.4382 1.8545.9577 4.9582L3.9641 7.29C4.6709 5.1545 6.6545 3.5455 9 3.5455z" fill="#EA4335"/>
+        </g>
+    </svg>
+);
+
+
 export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTour }) => {
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
-  const googleButtonContainerRef = useRef<HTMLDivElement>(null);
   
   // New state for OTP flow
   const [email, setEmail] = useState('');
@@ -62,36 +63,81 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
   const [isOtpLoading, setIsOtpLoading] = useState(false);
   const [otpError, setOtpError] = useState<string | null>(null);
 
-  const decodeJwt = (token: string): DecodedJwt | null => {
-      try {
-          const base64Url = token.split('.')[1];
-          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-          const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
-              return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-          }).join(''));
-          return JSON.parse(jsonPayload);
-      } catch (e) {
-          console.error("Error decoding JWT", e);
-          return null;
-      }
-  };
+  const tokenClientRef = useRef<any>(null);
 
-  const handleGoogleLogin = (response: CredentialResponse) => {
-      if (response.credential) {
-          setIsGoogleLoading(true);
-          const decodedToken = decodeJwt(response.credential);
-          if (decodedToken && decodedToken.email) {
-              onLogin(decodedToken.email);
-          } else {
-              console.error("Login failed: could not extract email from Google credential.");
-              Swal.fire({ icon: 'error', title: 'Login Failed', text: 'Could not retrieve your email from Google.'});
-              setIsGoogleLoading(false);
-          }
-      } else {
-          console.error("Google login failed", response);
-          setIsGoogleLoading(false);
-      }
+  const handleCustomGoogleLogin = () => {
+    if (tokenClientRef.current) {
+        setIsGoogleLoading(true);
+        tokenClientRef.current.requestAccessToken({ prompt: '' });
+    } else {
+        console.error("Google Token Client not initialized.");
+        Swal.fire({ icon: 'error', title: 'Initialization Error', text: 'Google Sign-In is not ready. Please refresh the page.'});
+    }
   };
+  
+  useEffect(() => {
+    const initializeGsi = () => {
+        if (typeof google === 'undefined' || !google.accounts || !google.accounts.oauth2) {
+            console.error("Google Identity Services library not loaded or doesn't support OAuth2.");
+            return;
+        }
+
+        tokenClientRef.current = google.accounts.oauth2.initTokenClient({
+            client_id: '408844365048-f8vtj15ovskp5drcqpm8rj5sep9kloqr.apps.googleusercontent.com',
+            scope: 'https://www.googleapis.com/auth/userinfo.email ' +
+                   'https://www.googleapis.com/auth/userinfo.profile',
+            callback: async (tokenResponse: any) => {
+                if (tokenResponse && tokenResponse.access_token) {
+                    try {
+                        const userInfoResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                            headers: { 'Authorization': `Bearer ${tokenResponse.access_token}` }
+                        });
+
+                        if (!userInfoResponse.ok) {
+                            throw new Error(`Failed to fetch user info. Status: ${userInfoResponse.status}`);
+                        }
+                        const userInfo = await userInfoResponse.json();
+
+                        if (userInfo && userInfo.email) {
+                            onLogin(userInfo.email);
+                        } else {
+                            throw new Error('Email not found in Google user profile.');
+                        }
+                    } catch (err) {
+                        console.error("Google login failed during user info fetch", err);
+                        Swal.fire({ icon: 'error', title: 'Login Failed', text: (err as Error).message });
+                        setIsGoogleLoading(false);
+                    }
+                } else {
+                    console.error("Google login failed: No access token received", tokenResponse);
+                    Swal.fire({ icon: 'error', title: 'Login Failed', text: 'Could not get access from Google.' });
+                    setIsGoogleLoading(false);
+                }
+            },
+            error_callback: (error: any) => {
+                if (error && (error.type === 'popup_closed' || error.type === 'popup_failed_to_open')) {
+                    console.log('Google login popup was closed by the user.');
+                    setIsGoogleLoading(false);
+                    return;
+                }
+                console.error("Google Sign-In Error:", error);
+                Swal.fire({ icon: 'error', title: 'Login Error', text: error.message || 'An error occurred during Google sign-in.' });
+                setIsGoogleLoading(false);
+            }
+        });
+    };
+
+    if (typeof google !== 'undefined' && google) {
+        initializeGsi();
+    } else {
+        const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
+        if (script) {
+            script.addEventListener('load', initializeGsi);
+            return () => script.removeEventListener('load', initializeGsi);
+        }
+    }
+  }, [onLogin]);
+
 
   const handleSendOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,29 +187,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
       setIsOtpLoading(false);
     }
   };
-
-  useEffect(() => {
-    if (isGoogleLoading) return; // Don't re-render the button while loading
-
-    if (typeof google === 'undefined' || !google.accounts) {
-        const timer = setTimeout(() => {
-            if (googleButtonContainerRef.current) { }
-        }, 100);
-        return () => clearTimeout(timer);
-    }
-    
-    google.accounts.id.initialize({
-        client_id: '408844365048-f8vtj15ovskp5drcqpm8rj5sep9kloqr.apps.googleusercontent.com',
-        callback: handleGoogleLogin,
-    });
-
-    if (googleButtonContainerRef.current) {
-        google.accounts.id.renderButton(
-            googleButtonContainerRef.current,
-            { theme: "filled_blue", size: "large", type: "standard", shape: "rectangular", width: "350", text: "continue_with" }
-        );
-    }
-  }, [isGoogleLoading]);
 
   const Spinner: React.FC = () => (
     <motion.div
@@ -337,14 +360,22 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
             </motion.div>
 
             <div className="flex justify-center items-center min-h-[50px]" id="google-login-button-container">
-                {isGoogleLoading ? (
-                     <Spinner />
-                ) : (
-                    <motion.div
-                        ref={googleButtonContainerRef}
-                        variants={itemVariants}
-                    />
-                )}
+                 <motion.button
+                    onClick={handleCustomGoogleLogin}
+                    disabled={isGoogleLoading}
+                    variants={itemVariants}
+                    style={{ width: '350px' }}
+                    className="flex justify-center items-center gap-3 rounded-lg bg-white px-3 py-2.5 text-sm font-bold leading-6 text-black shadow-md hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:opacity-60 disabled:cursor-not-allowed transition-all border border-gray-300"
+                >
+                    {isGoogleLoading ? (
+                        <Spinner />
+                    ) : (
+                        <>
+                            <GoogleIcon />
+                            <span>Continue with Google</span>
+                        </>
+                    )}
+                </motion.button>
             </div>
              
              <footer className="text-center text-gray-500 text-xs mt-12">
