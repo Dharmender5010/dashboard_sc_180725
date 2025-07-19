@@ -377,13 +377,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
                     )}
                 </motion.button>
             </div>
-             
-             <footer className="text-center text-gray-500 text-xs mt-12">
-                <p>&copy;{new Date().getFullYear()} Sales Dashboard. All rights reserved.</p>
-            </footer>
           </div>
         </motion.div>
       </div>
+      <footer className="absolute bottom-4 w-full text-center text-gray-500 text-xs z-10">
+          <p>&copy;2025 Sales Dashboard. All rights reserved.</p>
+          <p className="mt-1 font-semibold">Developed by:- Dharmender</p>
+      </footer>
     </div>
   );
 };
