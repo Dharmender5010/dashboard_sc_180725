@@ -11,10 +11,10 @@ import { SearchableSelect } from './SearchableSelect';
 import { DateRangePicker } from './DateRangePicker';
 import { PerformanceCards } from './PerformanceCards';
 import { AnimatedBackground } from './AnimatedBackground';
-import { HelpButton } from './HelpButton';
 import { HelpModal } from './HelpModal';
 import { NotificationsPanel } from './NotificationsPanel';
 import { FormModal } from './FormModal';
+import { FloatingNav } from './FloatingNav';
 
 interface DashboardPageProps {
   userEmail: string;
@@ -206,15 +206,10 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
         <div className="min-h-screen font-sans">
             <AnimatedBackground />
             
-            <button
-              onClick={onStartTour}
-              className="fixed bottom-4 left-4 z-50 bg-white text-brand-primary rounded-lg px-4 py-2 shadow-lg hover:bg-brand-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-dark transition-all text-sm font-semibold"
-              aria-label="Take a Tour"
-              title="Take a Tour"
-            >
-              Take a Tour
-            </button>
-            <HelpButton onClick={() => setIsHelpModalOpen(true)} />
+            <FloatingNav 
+                onStartTour={onStartTour}
+                onOpenHelpModal={() => setIsHelpModalOpen(true)}
+            />
             <HelpModal 
                 isOpen={isHelpModalOpen} 
                 onClose={() => setIsHelpModalOpen(false)}
