@@ -18,7 +18,7 @@ declare const Swal: any;
 
 // --- CONFIGURATION ---
 // Easily configurable screensaver start time in milliseconds
-const SCREENSAVER_TIMEOUT = 10000;
+const SCREENSAVER_TIMEOUT = 50000;
 
 const App: React.FC = () => {
     const [userEmail, setUserEmail] = useState<string | null>(() => localStorage.getItem('userEmail'));
