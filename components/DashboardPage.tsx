@@ -326,6 +326,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
                             onOpenFormModal={handleOpenFormModal}
                         />
                     </motion.div>
+
+                    <motion.footer 
+                        variants={itemVariants} 
+                        className="mt-8 py-4 text-sm text-gray-600 flex justify-between items-center border-t border-gray-200"
+                    >
+                      <span className="font-semibold">Developed by:- Dharmender</span>
+                      <span className="font-medium">&copy;2025 Sales Dashboard. All rights reserved.</span>
+                    </motion.footer>
+
                 </motion.div>
             </main>
         </div>
