@@ -16,22 +16,22 @@ const COLUMNS_WITH_ASTERISKS = ['planned', 'actual', 'lastStatus', 'remark'];
 
 // This is the single source of truth for default column widths.
 const getColumnWidths = (): Record<string, number> => ({
-    leadId: 170,
-    personName: 200,
-    mobile: 220,
-    state: 170,
-    requirement: 240,
-    salesPerson: 240,
+    leadId: 140,
+    personName: 190,
+    mobile: 200,
+    state: 150,
+    requirement: 220,
+    salesPerson: 190,
     stepName: 220,
-    stepCode: 170,
-    daysOfFollowUp: 180,
-    numberOfFollowUps: 180,
-    planned: 250,
-    actual: 250,
+    stepCode: 160,
+    daysOfFollowUp: 150,
+    numberOfFollowUps: 150,
+    planned: 230,
+    actual: 230,
     lastStatus: 170,
-    remark: 300,
+    remark: 330,
     link: 180,
-    doer: 150,
+    doer: 130,
 });
 
 
