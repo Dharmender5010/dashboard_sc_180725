@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { ExclamationCircleIcon, AtSymbolIcon, KeyIcon, XMarkIcon } from './icons';
@@ -226,7 +227,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
       </div>
 
       {/* Right side with form */}
-      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24 z-10">
+      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24 z-10 relative">
         <motion.div 
             className="mx-auto w-full max-w-sm text-center"
             variants={containerVariants}
@@ -377,13 +378,14 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
                     )}
                 </motion.button>
             </div>
+             
+            <p className="mt-8 text-center text-xs text-gray-500">&copy;2025 Sales Dashboard. All rights reserved.</p>
           </div>
         </motion.div>
+        <footer className="absolute bottom-4 left-0 right-0 text-center text-gray-500 text-xs">
+            <p className="font-semibold">Developed by:- Dharmender</p>
+        </footer>
       </div>
-      <footer className="absolute bottom-4 w-full text-center text-gray-500 text-xs z-10">
-          <p>&copy;2025 Sales Dashboard. All rights reserved.</p>
-          <p className="mt-1 font-semibold">Developed by:- Dharmender</p>
-      </footer>
     </div>
   );
 };
