@@ -20,10 +20,10 @@ export const loginSteps: Step[] = [
     title: 'Option 2: Email & OTP',
   },
   {
-    target: '#help-button',
-    content: 'If you ever run into any issues or need assistance, you can click here to send a help request directly to our support team.',
+    target: '#floating-nav-toggle',
+    content: 'If you ever need help or want to retake this tour, click this icon to access the options.',
     placement: 'left',
-    title: 'Need Help?',
+    title: 'Quick Access Menu',
   },
 ];
 
