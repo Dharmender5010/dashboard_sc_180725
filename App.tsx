@@ -197,7 +197,7 @@ const App: React.FC = () => {
               icon: "error",
               title: "Oops...",
               text: "Email id not registered or user data is incomplete.",
-              footer: 'Please contact with system creation team'
+              footer: 'Please use the "Need Help?" option to contact support.'
             });
         }
     };
