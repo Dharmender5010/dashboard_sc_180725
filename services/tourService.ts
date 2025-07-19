@@ -6,6 +6,7 @@ export const loginSteps: Step[] = [
     content: "Hello! Welcome to the SC-Dashboard. I'm here to give you a quick tour of the application.",
     placement: 'bottom',
     title: 'Welcome!',
+    disableBeacon: true,
   },
   {
     target: '#google-login-button-container',
@@ -33,6 +34,7 @@ const commonDashboardSteps: Step[] = [
         content: "Great, you're logged in! This is your main dashboard. Let's take a look around.",
         placement: 'bottom',
         title: 'Welcome to the Dashboard',
+        disableBeacon: true,
     },
     {
         target: '#header-user-info',
