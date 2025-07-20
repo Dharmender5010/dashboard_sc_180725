@@ -73,6 +73,24 @@
           animation-iteration-count: infinite;
           bottom: -150px;
       }
+      
+      @keyframes blink-border {
+        0%, 100% { border-color: #ef4444; } /* red-500 */
+        50% { border-color: transparent; }
+      }
+      .blinking-border {
+        animation: blink-border 1.5s step-end infinite;
+        border-width: 2px;
+      }
+
+      @keyframes blink-text {
+        50% {
+          opacity: 0.2;
+        }
+      }
+      .animate-blink-text {
+        animation: blink-text 1.5s step-end infinite;
+      }
     </style>
   <script type="importmap">
 {
