@@ -1,115 +1,200 @@
 
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, Variants } from 'framer-motion';
 
+// A more modern, animated illustration for the maintenance page.
 const MaintenanceIllustration = () => (
-    <svg viewBox="0 0 500 350" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto max-w-2xl" aria-hidden="true">
+    <svg viewBox="0 0 600 400" xmlns="http://www.w3.org/2000/svg" className="w-full h-auto max-w-lg mx-auto" aria-hidden="true">
         <defs>
-            <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur in="SourceAlpha" stdDeviation="3"/>
-                <feOffset dx="2" dy="4" result="offsetblur"/>
-                <feComponentTransfer>
-                    <feFuncA type="linear" slope="0.2"/>
-                </feComponentTransfer>
+            <linearGradient id="grad-main" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#818cf8" />
+                <stop offset="100%" stopColor="#4f46e5" />
+            </linearGradient>
+            <filter id="soft-glow" x="-50%" y="-50%" width="200%" height="200%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur" />
+                <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.7 0" result="glow" />
                 <feMerge>
-                    <feMergeNode/>
-                    <feMergeNode in="SourceGraphic"/>
+                    <feMergeNode in="glow" />
+                    <feMergeNode in="SourceGraphic" />
                 </feMerge>
             </filter>
         </defs>
 
-        {/* Browser window */}
-        <g transform="translate(50, 50)" filter="url(#shadow)">
-            <rect x="0" y="0" width="300" height="200" rx="10" fill="#eef2ff"/>
-            <rect x="0" y="0" width="300" height="25" rx="10" ry="10" fill="#e0e7ff"/>
-            <circle cx="15" cy="12.5" r="4" fill="#ef4444"/>
-            <circle cx="30" cy="12.5" r="4" fill="#f59e0b"/>
-            <circle cx="45" cy="12.5" r="4" fill="#22c55e"/>
+        {/* Abstract background shapes with animation */}
+        <motion.circle 
+            cx="100" cy="100" r="80" 
+            fill="url(#grad-main)" 
+            opacity="0.1" 
+            animate={{ scale: [1, 1.05, 1], transition: { duration: 5, repeat: Infinity, ease: "easeInOut" } }}
+        />
+        <motion.path 
+            d="M 500 200 Q 550 250 500 300 T 500 400" 
+            stroke="#c7d2fe" 
+            strokeWidth="10" 
+            fill="none" 
+            strokeLinecap="round"
+            initial={{ pathLength: 0, opacity: 0 }}
+            animate={{ pathLength: 1, opacity: 0.3, transition: { duration: 2, delay: 0.5, repeat: Infinity, repeatType: 'reverse', ease: "easeInOut" } }}
+        />
 
-            {/* Gears inside browser */}
-            <g transform="translate(150, 110) scale(0.8)">
-                <path d="M26.34-1.25a15 15 0 1 0 0 2.5L35 2.5v-5L26.34-1.25z M4.65-1.25a15 15 0 1 0 0 2.5L-4 2.5v-5l8.65-1.25z M16.25-25.29a15 15 0 1 0-2.5 0l-1.25-8.66h5l-1.25 8.66z M16.25 27.79a15 15 0 1 0-2.5 0l-1.25 8.66h5l-1.25-8.66z" fill="#4f46e5" transform="rotate(15)">
-                    <animateTransform attributeName="transform" type="rotate" from="15 15 15" to="375 15 15" dur="10s" repeatCount="indefinite"/>
-                </path>
-                <circle r="7" fill="#eef2ff"/>
-            </g>
-            <g transform="translate(190, 140) scale(0.5)">
-                <path d="M26.34-1.25a15 15 0 1 0 0 2.5L35 2.5v-5L26.34-1.25z M4.65-1.25a15 15 0 1 0 0 2.5L-4 2.5v-5l8.65-1.25z M16.25-25.29a15 15 0 1 0-2.5 0l-1.25-8.66h5l-1.25 8.66z M16.25 27.79a15 15 0 1 0-2.5 0l-1.25 8.66h5l-1.25-8.66z" fill="#6366f1" transform="rotate(0)">
-                    <animateTransform attributeName="transform" type="rotate" from="0 15 15" to="-360 15 15" dur="8s" repeatCount="indefinite"/>
-                </path>
-                <circle r="7" fill="#eef2ff"/>
-            </g>
+        {/* Central gear icon */}
+        <g transform="translate(300, 200)" filter="url(#soft-glow)">
+            <motion.path 
+                d="M -16.25,27.79 a 15,15 0 1,0 2.5,0 l 1.25,8.66 h -5 z M 16.25, -25.29 a 15,15 0 1,0 -2.5,0 l -1.25, -8.66 h 5 z M 26.34, -1.25 a 15,15 0 1,0 0,2.5 l 8.66,1.25 v -5 z M -4.65, -1.25 a 15,15 0 1,0 0,2.5 l -8.66,1.25 v -5 z"
+                fill="url(#grad-main)"
+                transform="scale(3.5)"
+                initial={{ rotate: 0 }}
+                animate={{ rotate: 360, transition: { duration: 20, repeat: Infinity, ease: 'linear' } }}
+            />
+            <motion.circle r="20" fill="#eef2ff" />
         </g>
         
-        {/* Phone */}
-         <g transform="translate(320, 100)" filter="url(#shadow)">
-            <rect x="0" y="0" width="80" height="160" rx="10" fill="#e0e7ff" />
-            <rect x="5" y="5" width="70" height="150" rx="5" fill="white" />
-             {/* Gear on phone */}
-             <g transform="translate(40, 80) scale(0.9)">
-                <path d="M26.34-1.25a15 15 0 1 0 0 2.5L35 2.5v-5L26.34-1.25z M4.65-1.25a15 15 0 1 0 0 2.5L-4 2.5v-5l8.65-1.25z M16.25-25.29a15 15 0 1 0-2.5 0l-1.25-8.66h5l-1.25 8.66z M16.25 27.79a15 15 0 1 0-2.5 0l-1.25 8.66h5l-1.25-8.66z" fill="#db2777" transform="rotate(45)">
-                     <animateTransform attributeName="transform" type="rotate" from="45 15 15" to="405 15 15" dur="12s" repeatCount="indefinite"/>
-                </path>
-                <circle r="7" fill="white"/>
-            </g>
-        </g>
-
-        {/* Wrench */}
-        <g transform="translate(10, 260) scale(1.3)" filter="url(#shadow)" fill="#94a3b8">
-            <path d="M20.7,5.2a3.4,3.4,0,0,0-4.8,0L5.3,15.8a1,1,0,0,0,0,1.4l4.2,4.2a1,1,0,0,0,1.4,0L21.5,11a3.4,3.4,0,0,0,0-4.8ZM10.2,20.7l-4.2-4.2L12,10.4,16.2,14.6ZM19.4,8.9,15.2,4.7a1.4,1.4,0,0,1,2-2l4.2,4.2a1.4,1.4,0,0,1,0,2L17.2,13.1,13,8.9Z" transform="scale(3) rotate(-30)"/>
-        </g>
-
-        {/* Person */}
-        <g transform="translate(250, 180)" fill="#db2777" filter="url(#shadow)">
-            <circle cx="15" cy="7" r="7"/>
-            <rect x="5" y="14" width="20" height="40" rx="10"/>
-        </g>
+        {/* Floating plus signs */}
+        <motion.path 
+            d="M 150 280 L 150 300 M 140 290 L 160 290" 
+            stroke="#a5b4fc" 
+            strokeWidth="4" 
+            strokeLinecap="round"
+            initial={{ y: 0, opacity: 1 }}
+            animate={{ y: -20, opacity: 0, transition: { duration: 3, repeat: Infinity, ease: "easeOut", delay: 1 } }}
+        />
+        <motion.path 
+            d="M 450 100 L 450 120 M 440 110 L 460 110" 
+            stroke="#a5b4fc" 
+            strokeWidth="6" 
+            strokeLinecap="round"
+            initial={{ y: 0, opacity: 1 }}
+            animate={{ y: -30, opacity: 0, transition: { duration: 4, repeat: Infinity, ease: "easeOut" } }}
+        />
     </svg>
 );
 
 
+const containerVariants: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: { staggerChildren: 0.2, delayChildren: 0.3 }
+    }
+};
+
+const itemVariants: Variants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { type: 'spring', stiffness: 100 } }
+};
+
+// Split text into words for animation
+const title = "Website is under".split(" ");
+const title2 = "MAINTENANCE".split("");
+
 export const MaintenancePage: React.FC = () => {
     return (
-        <div className="min-h-screen bg-sky-50 font-sans flex items-center justify-center p-4 overflow-hidden">
-            <div className="w-full max-w-6xl mx-auto">
+        <div className="min-h-screen bg-slate-50 font-sans flex items-center justify-center p-4 overflow-hidden relative">
+             {/* Animated background particles */}
+            <div className="absolute inset-0 z-0 overflow-hidden">
+                {Array.from({ length: 15 }).map((_, i) => (
+                    <motion.div
+                        key={i}
+                        className="absolute bg-indigo-100 rounded-full"
+                        style={{
+                            width: Math.random() * 50 + 20,
+                            height: Math.random() * 50 + 20,
+                            left: `${Math.random() * 100}%`,
+                            bottom: '-50px',
+                        }}
+                        animate={{
+                            y: `-${window.innerHeight + 100}px`,
+                            x: (Math.random() - 0.5) * 200,
+                            rotate: Math.random() * 360,
+                            scale: Math.random() * 0.5 + 0.5,
+                        }}
+                        transition={{
+                            duration: Math.random() * 15 + 10,
+                            repeat: Infinity,
+                            ease: 'linear',
+                            delay: Math.random() * 5,
+                        }}
+                    />
+                ))}
+            </div>
+            
+            <div className="w-full max-w-5xl mx-auto z-10">
                 <motion.div 
-                    className="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16"
+                    className="flex flex-col items-center justify-center gap-8 text-center"
+                    variants={containerVariants}
                     initial="hidden"
                     animate="visible"
-                    variants={{
-                        hidden: { opacity: 0 },
-                        visible: {
-                            opacity: 1,
-                            transition: {
-                                staggerChildren: 0.3,
-                                delayChildren: 0.2,
-                            }
-                        }
-                    }}
                 >
                     <motion.div 
-                        className="w-full lg:w-1/2"
-                        variants={{ hidden: { x: -100, opacity: 0 }, visible: { x: 0, opacity: 1, transition: { type: 'spring', stiffness: 50 }}}}
+                        className="w-full max-w-md"
+                        variants={itemVariants}
                     >
                        <MaintenanceIllustration />
                     </motion.div>
                     
-                    <motion.div 
-                        className="w-full lg:w-1/2 text-center lg:text-left"
-                        variants={{ hidden: { x: 100, opacity: 0 }, visible: { x: 0, opacity: 1, transition: { type: 'spring', stiffness: 50 }}}}
-                    >
+                    <motion.div variants={itemVariants}>
                         <h1 className="text-4xl md:text-5xl font-light text-slate-700 leading-tight">
-                            Website is under
+                             {title.map((el, i) => (
+                                <motion.span
+                                    key={i}
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{
+                                        duration: 0.25,
+                                        delay: i / 10,
+                                    }}
+                                    className="inline-block mr-3"
+                                >
+                                    {el}
+                                </motion.span>
+                            ))}
                             <br />
-                            <strong className="font-extrabold text-indigo-600">MAINTENANCE</strong>
+                            <strong className="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-sky-500">
+                                {title2.map((el, i) => (
+                                    <motion.span
+                                        key={i}
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{
+                                            type: 'spring',
+                                            damping: 15,
+                                            stiffness: 200,
+                                            delay: (title.length + i) / 10,
+                                        }}
+                                        className="inline-block"
+                                    >
+                                        {el}
+                                    </motion.span>
+                                ))}
+                            </strong>
                         </h1>
-                        <p className="mt-6 text-base md:text-lg text-slate-500 max-w-md mx-auto lg:mx-0">
+                        <motion.p 
+                            className="mt-6 text-base md:text-lg text-slate-500 max-w-lg mx-auto"
+                            variants={itemVariants}
+                        >
                              We're currently performing scheduled maintenance to improve our services. We'll be back online shortly. Thank you for your patience!
-                        </p>
-                         <footer className="mt-12 text-gray-500 text-sm">
-                            &copy;2025 Sales Dashboard. All rights reserved.
-                        </footer>
+                        </motion.p>
                     </motion.div>
+                    
+                    <motion.div 
+                        variants={itemVariants}
+                        className="mt-8 flex items-center gap-3 text-sm font-medium text-slate-400"
+                    >
+                        <motion.div 
+                            className="w-2 h-2 bg-indigo-400 rounded-full"
+                            animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
+                            transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                        />
+                        <span>Work in progress...</span>
+                    </motion.div>
+
+                    <motion.footer 
+                        variants={itemVariants}
+                        className="mt-8 text-gray-500 text-xs"
+                    >
+                        &copy;2025 Sales Dashboard. All rights reserved.
+                    </motion.footer>
+
                 </motion.div>
             </div>
         </div>
