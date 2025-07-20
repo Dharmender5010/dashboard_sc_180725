@@ -6,7 +6,7 @@ import { Header } from './Header';
 import { BarChartComponent } from './BarChartComponent';
 import { LineChartComponent } from './LineChartComponent';
 import { DataTable } from './DataTable';
-import { FilterXIcon } from './icons';
+import { FilterXIcon, SearchIcon } from './icons';
 import { SearchableSelect } from './SearchableSelect';
 import { DateRangePicker } from './DateRangePicker';
 import { PerformanceCards } from './PerformanceCards';
@@ -78,6 +78,7 @@ const itemVariants: Variants = {
 
 export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userName, userRole, scUserEmails, data, performanceData, helpTickets, onUpdateTicket, onLogout, onRefresh, isRefreshing, lastUpdated, onStartTour }) => {
     const [filters, setFilters] = useState({ stepCode: '', mobile: '', leadId: '' });
+    const [searchTerm, setSearchTerm] = useState('');
     const [dateRange, setDateRange] = useState<{ start: Date | null, end: Date | null }>({ start: null, end: null });
     const [selectedScEmail, setSelectedScEmail] = useState<string>('');
     const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
@@ -96,6 +97,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
     const handleResetFilters = () => {
         setFilters({ stepCode: '', mobile: '', leadId: '' });
         setDateRange({ start: null, end: null });
+        setSearchTerm('');
         if (userRole === 'Admin') {
             setSelectedScEmail('');
         }
@@ -142,6 +144,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
     }, [baseData]);
 
     const filteredData = useMemo(() => {
+        const lowercasedSearchTerm = searchTerm.toLowerCase();
+
         return baseData.filter(item => {
             const stepCodeMatch = filters.stepCode ? item.stepCode === filters.stepCode : true;
             const mobileMatch = filters.mobile ? String(item.mobile) === filters.mobile : true;
@@ -163,9 +167,16 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
                 return itemDate >= startDate && itemDate <= endDate;
             })();
 
-            return stepCodeMatch && mobileMatch && leadIdMatch && dateMatch;
+            const searchMatch = lowercasedSearchTerm
+                ? String(item.leadId).toLowerCase().includes(lowercasedSearchTerm) ||
+                  String(item.stepCode).toLowerCase().includes(lowercasedSearchTerm) ||
+                  String(item.mobile).toLowerCase().includes(lowercasedSearchTerm) ||
+                  String(item.salesPerson).toLowerCase().includes(lowercasedSearchTerm)
+                : true;
+
+            return stepCodeMatch && mobileMatch && leadIdMatch && dateMatch && searchMatch;
         });
-    }, [baseData, filters, dateRange]);
+    }, [baseData, filters, dateRange, searchTerm]);
 
     const stepCodeData = useMemo(() => {
         const counts: { [key: string]: number } = {};
@@ -302,10 +313,23 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
                               />
                             </div>
                         </div>
-                        <div className="flex justify-end mt-4">
+                        <div className="flex justify-between items-center mt-6 gap-6">
+                            <div className="relative flex-grow">
+                                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                    <SearchIcon className="h-5 w-5 text-gray-400" />
+                                </div>
+                                <input
+                                    type="search"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Search by Lead ID, Step Code, Mobile, or Sales Person..."
+                                    className="block w-full pl-12 pr-4 py-3.5 bg-white border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-brand-secondary focus:border-transparent sm:text-sm"
+                                    id="global-search-input"
+                                />
+                            </div>
                             <button
                                 onClick={handleResetFilters}
-                                className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-gray-700 transition-all flex items-center justify-center gap-2"
+                                className="bg-gray-500 hover:bg-gray-600 text-white font-semibold py-3.5 px-6 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-gray-700 transition-all flex items-center justify-center gap-2"
                                 aria-label="Reset Filters"
                                 id="reset-filters-button"
                             >
@@ -331,7 +355,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
                         variants={itemVariants} 
                         className="mt-8 py-4 text-sm text-gray-600 flex justify-between items-center border-t border-gray-200"
                     >
-                      <span className="font-semibold">Developed by:- Dharmender</span>
+                      <span className="font-semibold">Developed by:- Dharmender,</span>
                       <span className="font-medium">&copy;2025 Sales Dashboard. All rights reserved.</span>
                     </motion.footer>
 
