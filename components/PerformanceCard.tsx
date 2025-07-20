@@ -48,7 +48,7 @@ const shineVariants: Variants = {
 export const PerformanceCard: React.FC<PerformanceCardProps> = ({ title, value, icon }) => {
   return (
     <motion.div 
-      className="bg-white rounded-xl shadow-md p-6 flex items-center space-x-4 border-l-4 border-brand-primary h-full overflow-hidden relative cursor-pointer"
+      className="bg-white rounded-xl shadow-md p-4 flex items-center space-x-3 border-l-4 border-brand-primary h-full overflow-hidden relative cursor-pointer"
       initial="rest"
       whileHover="hover"
       animate="rest"
