@@ -66,8 +66,8 @@ export const PerformanceCard: React.FC<PerformanceCardProps> = ({ title, value, 
       >
         {icon}
       </motion.div>
-      <div className="min-w-0 flex-1 z-10">
-        <p className="text-sm font-medium text-gray-500 h-10">{title}</p>
+      <div className="min-w-0 flex-1 z-10 flex flex-col">
+        <p className="text-sm font-medium text-gray-500">{title}</p>
         <p className="text-2xl font-bold text-gray-900">{value}</p>
       </div>
     </motion.div>
