@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { UserIcon, RefreshCwIcon, LogOutIcon, BellIcon } from './icons';
@@ -136,7 +135,7 @@ export const Header: React.FC<HeaderProps> = ({ userEmail, userName, userRole, o
                       onChange={handleToggleMaintenance}
                       aria-label="Toggle maintenance mode"
                   />
-                  <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-red-400 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                  <div className="w-11 h-6 bg-status-success rounded-full peer peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-red-400 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
                   <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-max bg-gray-800 text-white text-xs rounded-md px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                       Mode: {maintenanceStatus}
                   </span>
