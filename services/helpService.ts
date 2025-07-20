@@ -1,4 +1,3 @@
-
 /*
 // --- CONSOLIDATED GOOGLE APPS SCRIPT (Code.gs) ---
 // This single script handles all backend functionality: OTP Login, Help Desk, and Maintenance Mode.
@@ -8,8 +7,15 @@
 //    - "Web_Permissions": With headers: userType, email, name.
 // 2. Add a maintenance flag to "Web_Permissions": Create a row with userType='Maintenance', email='status', name='OFF' (or 'ON').
 // 3. Paste this entire script into your Apps Script project, replacing any old code.
-// 4. Update the DRIVE_FOLDER_ID with your Google Drive folder's ID for screenshots.
+// 4. Update the DRIVE_FOLDER_ID and BACKEND_SECRET_KEY variables below.
 // 5. Deploy as a Web App with "Execute as: Me" and "Who has access: Anyone". Use the generated URL in both helpService.ts and otpService.ts.
+
+// --- NEW FAILSAFE TO TURN OFF MAINTENANCE MODE ---
+// If you are locked out, you can turn off maintenance mode by visiting a special URL.
+// 1. SET a strong, secret key in the `BACKEND_SECRET_KEY` variable below.
+// 2. DEPLOY the script.
+// 3. To use it, visit: YOUR_WEB_APP_URL?action=turnOffMaintenance&key=YOUR_SECRET_KEY
+//    For example: https://script.google.com/macros/s/..../exec?action=turnOffMaintenance&key=MySuperSecret123
 
 const SPREADSHEET_ID = '1JiwnMWCok3HumvYQA3IduXSFbAkkbGC0aBFFNK6Lti8';
 const HELP_TICKETS_SHEET_NAME = 'Need_Help';
@@ -18,6 +24,9 @@ const PERMISSIONS_SHEET_NAME = 'Web_Permissions';
 const DEVELOPER_EMAIL = "mis@bonhoeffermachines.in";
 // IMPORTANT: Paste the ID of your Google Drive folder for screenshots here.
 const DRIVE_FOLDER_ID = '1r4_tT807APYOq0XRUEkJLNbAAJgbmf41'; 
+// IMPORTANT: Set your own secret key here for the failsafe. This is critical for security.
+const BACKEND_SECRET_KEY = "CHANGE_ME_TO_A_STRONG_SECRET"; 
+
 
 // Helper function to get a sheet and throw a specific error if not found.
 function getSheet(name) {
@@ -28,6 +37,42 @@ function getSheet(name) {
   return sheet;
 }
 
+// Handles GET requests (for failsafe actions)
+function doGet(e) {
+  try {
+    const params = e.parameter;
+    const action = params.action;
+    const secretKey = params.key;
+
+    if (secretKey !== BACKEND_SECRET_KEY) {
+      throw new Error("Unauthorized: Invalid secret key.");
+    }
+
+    if (action === 'turnOffMaintenance') {
+      const sheet = getSheet(PERMISSIONS_SHEET_NAME);
+      const data = sheet.getDataRange().getValues();
+      
+      for (let i = 0; i < data.length; i++) {
+        const userType = String(data[i][0]).trim();
+        const email = String(data[i][1]).trim();
+        if (userType === 'Maintenance' && email === 'status') {
+          sheet.getRange(i + 1, 3).setValue('OFF');
+          return ContentService.createTextOutput("SUCCESS: Maintenance mode has been turned OFF.").setMimeType(ContentService.MimeType.TEXT);
+        }
+      }
+      // If not found, append it as OFF
+      sheet.appendRow(['Maintenance', 'status', 'OFF']);
+      return ContentService.createTextOutput("SUCCESS: Maintenance mode flag created and set to OFF.").setMimeType(ContentService.MimeType.TEXT);
+    } else {
+      throw new Error("Invalid action specified for GET request.");
+    }
+  } catch (error) {
+    Logger.log(error.toString());
+    return ContentService.createTextOutput(`ERROR: ${error.toString()}`).setMimeType(ContentService.MimeType.TEXT);
+  }
+}
+
+// Handles POST requests (from the web app)
 function doPost(e) {
   try {
     const payload = JSON.parse(e.postData.contents);
@@ -241,7 +286,7 @@ function handleVerifyOtp(payload) {
 import { HelpTicket } from '../types';
 
 // --- CONFIGURATION ---
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyA7oayY__r4YfwHCLjjBmHbt__fflJ4Anfz-yK60TRheAQmW3pdo-QT_7Er00Z_qZi/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwCN4XGeKTP-L0L7lfDlSA6kFb58ncflXN0YsORl5GHLVq4V1m98aeJnhmKtAI2yEn8/exec';
 
 export const DEVELOPER_EMAIL = "mis@bonhoeffermachines.in";
 
