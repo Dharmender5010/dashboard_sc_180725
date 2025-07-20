@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Joyride, { CallBackProps, STATUS, Step, EVENTS } from 'react-joyride';
 import { AnimatePresence } from 'framer-motion';
@@ -39,6 +40,7 @@ const App: React.FC = () => {
     const [error, setError] = useState<string | null>(null);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
     const [maintenanceStatus, setMaintenanceStatus] = useState<'ON' | 'OFF'>('OFF');
+    const [countdown, setCountdown] = useState<number>(0); // This is now a duration in seconds, counting up
     
     // Tour state
     const [{ run, steps, stepIndex }, setTourState] = useState<{
@@ -83,6 +85,23 @@ const App: React.FC = () => {
             events.forEach(event => window.removeEventListener(event, handleUserActivity));
         };
     }, [handleUserActivity]);
+
+    useEffect(() => {
+        let timerId: number | undefined;
+        if (maintenanceStatus === 'ON') {
+            // This will reset on every status change to ON, fulfilling "every time after start maintenance ON"
+            setCountdown(0);
+            timerId = window.setInterval(() => {
+                setCountdown(prev => prev + 1); // Count up
+            }, 1000);
+        } else {
+            setCountdown(0); // Reset when maintenance is OFF
+        }
+
+        return () => {
+            if(timerId) clearInterval(timerId);
+        };
+    }, [maintenanceStatus]);
 
     const fetchTickets = useCallback(async () => {
         if (userEmail && userRole) {
@@ -303,9 +322,24 @@ const App: React.FC = () => {
         });
 
         if (result.isConfirmed) {
-            setIsLoading(true);
+            // Show a loading indicator immediately while the backend process runs.
+            Swal.fire({
+                title: 'Processing Update',
+                html: `Turning maintenance mode <b>${newStatus}</b>. This may take a moment.`,
+                timerProgressBar: true,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             try {
                 await updateMaintenanceStatus(newStatus, userEmail);
+                // After updating, refresh all data to reflect the change everywhere.
+                await handleRefresh(); 
+
+                // Once everything is done, show the success message.
+                // The loading Swal will be replaced by this one.
                 Swal.fire({
                     icon: 'success',
                     title: 'Success!',
@@ -313,15 +347,13 @@ const App: React.FC = () => {
                     timer: 2000,
                     showConfirmButton: false,
                 });
-                await handleRefresh(); // Refresh to get the latest status
             } catch (err) {
+                // If an error occurs, show an error message.
                 Swal.fire({
                     icon: 'error',
                     title: 'Update Failed',
                     text: (err as Error).message,
                 });
-            } finally {
-                setIsLoading(false);
             }
         }
     };
@@ -384,6 +416,7 @@ const App: React.FC = () => {
                     onStartTour={() => handleTourStart('dashboard')}
                     maintenanceStatus={maintenanceStatus}
                     onUpdateMaintenanceStatus={handleUpdateMaintenanceStatus}
+                    countdown={countdown}
                 />
             )}
         </>
