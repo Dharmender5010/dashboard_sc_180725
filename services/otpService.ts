@@ -22,7 +22,7 @@
 
 // --- CONFIGURATION ---
 // PASTE YOUR **SINGLE, CONSOLIDATED** DEPLOYED WEB APP URL HERE.
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyA7oayY__r4YfwHCLjjBmHbt__fflJ4Anfz-yK60TRheAQmW3pdo-QT_7Er00Z_qZi/exec'; // This URL must be from your new, consolidated script deployment.
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwCN4XGeKTP-L0L7lfDlSA6kFb58ncflXN0YsORl5GHLVq4V1m98aeJnhmKtAI2yEn8/exec'; // This URL must be from your new, consolidated script deployment.
 
 const makeApiCall = async (payload: object): Promise<any> => {
     if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR_URL_HERE')) {
