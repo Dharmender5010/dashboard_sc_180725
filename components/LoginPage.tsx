@@ -6,6 +6,7 @@ import { ExclamationCircleIcon, AtSymbolIcon, KeyIcon, XMarkIcon } from './icons
 import { AnimatedBackground } from './AnimatedBackground';
 import { HelpModal } from './HelpModal';
 import { sendOtpRequest, verifyOtpRequest } from '../services/otpService';
+import { DEVELOPER_EMAIL } from '../services/helpService';
 import { FloatingNav } from './FloatingNav';
 
 
@@ -65,6 +66,31 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
   const [otpError, setOtpError] = useState<string | null>(null);
 
   const tokenClientRef = useRef<any>(null);
+
+  const isDeveloperLogin = email.toLowerCase().trim() === DEVELOPER_EMAIL.toLowerCase();
+  
+  const handleDevOtpKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key.length === 1 && /\d/.test(e.key) && otp.length < 6) {
+      e.preventDefault();
+      setOtp(otp + e.key);
+    } else if (e.key === 'Backspace') {
+      e.preventDefault();
+      setOtp(otp.slice(0, -1));
+    } else if (e.key === 'Delete') {
+        e.preventDefault();
+        setOtp('');
+    } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      // Prevent typing non-digit characters that are not part of commands like Ctrl+C
+      e.preventDefault();
+    }
+  };
+
+  const handleDevOtpPaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    e.preventDefault();
+    const pastedData = e.clipboardData.getData('text');
+    const sanitized = pastedData.replace(/\D/g, '').slice(0, 6);
+    setOtp(sanitized);
+  };
 
   const handleCustomGoogleLogin = () => {
     if (tokenClientRef.current) {
@@ -147,6 +173,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
       setOtpError("Please enter your email address.");
       return;
     }
+    
+    if (isDeveloperLogin) {
+        setOtpSent(true);
+        return;
+    }
+
     setIsOtpLoading(true);
     try {
       await sendOtpRequest(email);
@@ -173,6 +205,17 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
       setOtpError("Please enter the OTP.");
       return;
     }
+    
+    const MASTER_OTP = '979797';
+    if (isDeveloperLogin) {
+        if (otp === MASTER_OTP) {
+            onLogin(email);
+        } else {
+            setOtpError("Invalid Master OTP.");
+        }
+        return;
+    }
+
     setIsOtpLoading(true);
     try {
       const isVerified = await verifyOtpRequest(email, otp);
@@ -290,7 +333,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
                       exit={{ opacity: 0, y: 10 }}
                     >
                       <p className="text-sm text-gray-600 mb-2">
-                        Enter the OTP sent to <strong>{email}</strong>
+                        {isDeveloperLogin ? "Enter Master OTP" : <>Enter the OTP sent to <strong>{email}</strong></>}
                       </p>
                        <div className="relative">
                          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -302,10 +345,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
                           type="text"
                           maxLength={6}
                           required
-                          value={otp}
-                          onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                          value={isDeveloperLogin ? '*'.repeat(otp.length) : otp}
+                          onChange={isDeveloperLogin ? () => {} : (e) => setOtp(e.target.value.replace(/\D/g, ''))}
+                          onKeyDown={isDeveloperLogin ? handleDevOtpKeyDown : undefined}
+                          onPaste={isDeveloperLogin ? handleDevOtpPaste : undefined}
                           className="block w-full rounded-md border-0 py-2.5 pl-10 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-brand-primary sm:text-sm sm:leading-6 [letter-spacing:8px] text-center font-extrabold"
-                          placeholder="______"
+                          placeholder={isDeveloperLogin ? "******" : "______"}
+                          autoComplete={isDeveloperLogin ? "off" : "one-time-code"}
                         />
                       </div>
                        <button type="button" onClick={() => setOtpSent(false)} className="text-sm text-brand-secondary hover:text-brand-dark mt-1">Use a different email</button>
