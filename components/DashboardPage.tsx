@@ -316,14 +316,14 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
                         <div className="flex justify-between items-center mt-6 gap-6">
                             <div className="relative flex-grow group">
                                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <SearchIcon className="h-5 w-5 text-gray-400 transition-colors duration-300 group-focus-within:text-white" />
+                                    <SearchIcon className="h-5 w-5 text-gray-400 transition-colors duration-300 group-focus-within:text-brand-primary" />
                                 </div>
                                 <input
                                     type="search"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     placeholder="Search by Lead ID, Step Code, Mobile, or Sales Person..."
-                                    className="block w-full pl-12 pr-4 py-3.5 bg-white border-2 border-brand-primary text-gray-900 rounded-lg shadow-sm focus:outline-none focus:bg-brand-primary focus:text-white focus:placeholder-indigo-200 transition-colors duration-300 sm:text-sm"
+                                    className="block w-full pl-12 pr-4 py-3.5 bg-white border-2 border-brand-primary text-gray-900 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-dark placeholder:text-gray-500 transition-colors duration-300 sm:text-sm"
                                     id="global-search-input"
                                 />
                             </div>
