@@ -105,7 +105,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
     
     const handleOpenFormModal = (url: string) => {
         if (url.includes('/viewform')) {
-            const embedUrl = url.replace('/viewform', '/viewform?embedded=true');
+            const embedUrl = url.replace('/viewform', '/viewform?embedded=true'); 
             setFormModalUrl(embedUrl);
         } else {
             setFormModalUrl(url);
