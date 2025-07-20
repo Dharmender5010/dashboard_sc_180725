@@ -1,10 +1,12 @@
 
 /*
 // --- CONSOLIDATED GOOGLE APPS SCRIPT (Code.gs) ---
-// This single script handles all backend functionality: OTP Login & Help Desk Tickets.
-// 1. In your Google Sheet, create a sheet named exactly "Need_Help".
-// 2. In "Need_Help", add these headers in the first row:
-//    TicketID, Timestamp, UserEmail, UserName, Issue, ScreenshotLink, Status, LastUpdated, ResolvedBy
+// This single script handles all backend functionality: OTP Login, Help Desk, and Maintenance Mode.
+// 1. In your Google Sheet ("1JiwnMWCok3HumvYQA3IduXSFbAkkbGC0aBFFNK6Lti8"), ensure you have these sheets:
+//    - "Need_Help": With headers: TicketID, Timestamp, UserEmail, UserName, Issue, ScreenshotLink, Status, LastUpdated, ResolvedBy
+//    - "OTP_Log": No headers needed, will be populated automatically.
+//    - "Web_Permissions": With headers: userType, email, name.
+// 2. Add a maintenance flag to "Web_Permissions": Create a row with userType='Maintenance', email='status', name='OFF' (or 'ON').
 // 3. Paste this entire script into your Apps Script project, replacing any old code.
 // 4. Update the DRIVE_FOLDER_ID with your Google Drive folder's ID for screenshots.
 // 5. Deploy as a Web App with "Execute as: Me" and "Who has access: Anyone". Use the generated URL in both helpService.ts and otpService.ts.
@@ -37,6 +39,7 @@ function doPost(e) {
       case 'send_help_request': result = handleSendHelpRequest(payload); break;
       case 'get_help_tickets': result = handleGetHelpTickets(payload); break;
       case 'update_ticket_status': result = handleUpdateTicketStatus(payload); break;
+      case 'set_maintenance_mode': result = handleSetMaintenanceMode(payload); break;
       default: throw new Error("Invalid action specified.");
     }
     return ContentService.createTextOutput(JSON.stringify({ success: true, ...result })).setMimeType(ContentService.MimeType.JSON);
@@ -46,6 +49,33 @@ function doPost(e) {
   }
 }
 
+// --- MAINTENANCE MODE ---
+function handleSetMaintenanceMode(payload) {
+  const { status, userEmail } = payload;
+  if (!userEmail || userEmail.toLowerCase() !== DEVELOPER_EMAIL.toLowerCase()) {
+    throw new Error("Unauthorized: Only the developer can change maintenance mode.");
+  }
+  if (status !== 'ON' && status !== 'OFF') {
+    throw new Error("Invalid status. Must be 'ON' or 'OFF'.");
+  }
+
+  const sheet = getSheet(PERMISSIONS_SHEET_NAME);
+  const data = sheet.getDataRange().getValues();
+  
+  for (let i = 0; i < data.length; i++) {
+    const userType = String(data[i][0]).trim();
+    const email = String(data[i][1]).trim();
+    if (userType === 'Maintenance' && email === 'status') {
+      sheet.getRange(i + 1, 3).setValue(status);
+      return { message: `Maintenance mode set to ${status}.` };
+    }
+  }
+  // If not found, append it
+  sheet.appendRow(['Maintenance', 'status', status]);
+  return { message: `Maintenance mode flag created and set to ${status}.` };
+}
+
+// --- HELP DESK ---
 function handleSendHelpRequest(payload) {
   const { email, issue, screenshot, userName } = payload;
   const sheet = getSheet(HELP_TICKETS_SHEET_NAME);
@@ -159,6 +189,7 @@ function handleUpdateTicketStatus(payload) {
   throw new Error("Ticket not found.");
 }
 
+// --- OTP LOGIN ---
 function handleSendOtp(payload) {
   const { email } = payload;
   const permissionsSheet = getSheet(PERMISSIONS_SHEET_NAME);
@@ -171,7 +202,20 @@ function handleSendOtp(payload) {
   const timestamp = new Date();
   const logSheet = getSheet(OTP_LOG_SHEET_NAME);
   logSheet.appendRow([email, otp, timestamp, false]);
-  MailApp.sendEmail(email, "Your Dashboard Login OTP", `Your One-Time Password is: ${otp}`);
+  const otp_subject = "SC-Dashboard Login OTP"
+  const otp_body =  `
+    <div style="font-family: Arial, sans-serif; text-align: center; color: #333;">
+      <h2>SC-Dashboard Login</h2>
+      <p>Your One-Time Password (OTP) is:</p>
+      <p style="font-size: 24px; font-weight: bold; letter-spacing: 5px; background-color: #f0f0f0; padding: 10px 20px; border-radius: 5px; display: inline-block;">${otp}</p>
+      <p>This code is valid for 3 minutes.</p>
+      <p style="font-size: 12px; color: #888;">If you did not request this, please ignore this email.</p>
+      <br><br><hr>
+      <p style="font-size: 15px; color: #999;">** This is a system-generated email. Please do not reply. **</p>
+    </div>
+  `;
+  
+  MailApp.sendEmail({ to: email, subject: otp_subject, htmlBody: otp_body, noReply: true });
   return { message: "OTP sent successfully." };
 }
 
@@ -197,7 +241,7 @@ function handleVerifyOtp(payload) {
 import { HelpTicket } from '../types';
 
 // --- CONFIGURATION ---
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbz3er2jaKwzaGCXGPm4y1WfLxXCHgNjY_98XtbaJYMJcu9XSkxkt3gsEtXz7OxgETxS/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyA7oayY__r4YfwHCLjjBmHbt__fflJ4Anfz-yK60TRheAQmW3pdo-QT_7Er00Z_qZi/exec';
 
 export const DEVELOPER_EMAIL = "mis@bonhoeffermachines.in";
 
@@ -304,3 +348,28 @@ export const updateTicketStatus = async (ticketId: string, status: string, userE
         throw handleApiError(error, 'update ticket status');
     }
 }
+
+export const updateMaintenanceStatus = async (status: 'ON' | 'OFF', userEmail: string): Promise<any> => {
+     if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR_URL_HERE')) {
+        throw new Error('The service is not configured.');
+    }
+    
+    const requestBody = { action: 'set_maintenance_mode', status, userEmail };
+
+    try {
+        const response = await fetch(WEB_APP_URL, {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+            body: JSON.stringify(requestBody),
+        });
+        const result = await response.json();
+        if (!response.ok || result.success === false) {
+           throw new Error(result.message || 'An unknown error occurred on the server.');
+        }
+        return result;
+    } catch(error) {
+        throw handleApiError(error, 'update maintenance status');
+    }
+};
