@@ -5,13 +5,15 @@ import { AnimatePresence } from 'framer-motion';
 import { LoginPage } from './components/LoginPage';
 import { DashboardPage } from './components/DashboardPage';
 import { fetchAndParseData, fetchUserPermissions, fetchPerformanceData } from './services/googleSheetService';
-import { fetchHelpTickets, updateTicketStatus } from './services/helpService';
+import { fetchHelpTickets, updateTicketStatus, updateMaintenanceStatus, DEVELOPER_EMAIL } from './services/helpService';
 import { loginSteps, dashboardStepsAdmin, dashboardStepsUser } from './services/tourService';
 import { tts } from './services/ttsService';
 import { TourTooltip } from './components/TourTooltip';
 import { FollowUpData, UserPermission, PerformanceData, HelpTicket } from './types';
 import { LoadingComponent } from './components/LoadingComponent';
 import Screensaver from './components/Screensaver';
+import { MaintenancePage } from './components/MaintenancePage';
+
 
 // Declare Swal for TypeScript since it's loaded from a script tag
 declare const Swal: any;
@@ -36,6 +38,7 @@ const App: React.FC = () => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [error, setError] = useState<string | null>(null);
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+    const [maintenanceStatus, setMaintenanceStatus] = useState<'ON' | 'OFF'>('OFF');
     
     // Tour state
     const [{ run, steps, stepIndex }, setTourState] = useState<{
@@ -105,6 +108,10 @@ const App: React.FC = () => {
             setUserPermissions(permissions);
             setPerformanceData(perfData);
             setLastUpdated(new Date());
+
+            const maintenanceSetting = permissions.find(p => p.userType === 'Maintenance' && p.email === 'status');
+            const currentStatus = (maintenanceSetting?.name === 'ON') ? 'ON' : 'OFF';
+            setMaintenanceStatus(currentStatus);
             
             if (userEmail && userRole) {
                 await fetchTickets();
@@ -162,7 +169,7 @@ const App: React.FC = () => {
         const normalizedEmail = email.toLowerCase().trim();
         const userPermission = userPermissions.find(p => p.email.toLowerCase() === normalizedEmail);
 
-        if (userPermission && (userPermission.userType === 'Admin' || userPermission.userType === 'User') && userPermission.name) {
+        if (userPermission && (userPermission.userType === 'Admin' || userPermission.userType === 'User' || userPermission.email.toLowerCase() === DEVELOPER_EMAIL.toLowerCase()) && userPermission.name) {
             Swal.fire({
               position: "center",
               icon: "success",
@@ -280,8 +287,52 @@ const App: React.FC = () => {
         }
     };
 
+    const handleUpdateMaintenanceStatus = async (newStatus: 'ON' | 'OFF') => {
+        if (!userEmail) return;
+
+        const result = await Swal.fire({
+            title: `Turn Maintenance Mode ${newStatus}?`,
+            text: newStatus === 'ON'
+                ? "This will make the site inaccessible to all users except you."
+                : "This will restore normal access for all users.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: newStatus === 'ON' ? '#ef4444' : '#10b981',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: `Yes, turn it ${newStatus}!`
+        });
+
+        if (result.isConfirmed) {
+            setIsLoading(true);
+            try {
+                await updateMaintenanceStatus(newStatus, userEmail);
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: `Maintenance mode is now ${newStatus}.`,
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+                await handleRefresh(); // Refresh to get the latest status
+            } catch (err) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Update Failed',
+                    text: (err as Error).message,
+                });
+            } finally {
+                setIsLoading(false);
+            }
+        }
+    };
+
+
     if (isLoading && (!allData.length || !userPermissions.length)) {
         return <LoadingComponent />;
+    }
+
+    if (maintenanceStatus === 'ON' && userEmail?.toLowerCase() !== DEVELOPER_EMAIL) {
+        return <MaintenancePage />;
     }
 
     const joyrideStyles = {
@@ -331,6 +382,8 @@ const App: React.FC = () => {
                     isRefreshing={isLoading}
                     lastUpdated={lastUpdated}
                     onStartTour={() => handleTourStart('dashboard')}
+                    maintenanceStatus={maintenanceStatus}
+                    onUpdateMaintenanceStatus={handleUpdateMaintenanceStatus}
                 />
             )}
         </>
