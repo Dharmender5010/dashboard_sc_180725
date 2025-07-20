@@ -30,6 +30,8 @@ interface DashboardPageProps {
   isRefreshing: boolean;
   lastUpdated: Date | null;
   onStartTour: () => void;
+  maintenanceStatus: 'ON' | 'OFF';
+  onUpdateMaintenanceStatus: (newStatus: 'ON' | 'OFF') => Promise<void>;
 }
 
 const monthOrder: { [key: string]: number } = {
@@ -76,7 +78,7 @@ const itemVariants: Variants = {
     },
 };
 
-export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userName, userRole, scUserEmails, data, performanceData, helpTickets, onUpdateTicket, onLogout, onRefresh, isRefreshing, lastUpdated, onStartTour }) => {
+export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userName, userRole, scUserEmails, data, performanceData, helpTickets, onUpdateTicket, onLogout, onRefresh, isRefreshing, lastUpdated, onStartTour, maintenanceStatus, onUpdateMaintenanceStatus }) => {
     const [filters, setFilters] = useState({ stepCode: '', mobile: '', leadId: '' });
     const [searchTerm, setSearchTerm] = useState('');
     const [dateRange, setDateRange] = useState<{ start: Date | null, end: Date | null }>({ start: null, end: null });
@@ -253,6 +255,8 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
                 lastUpdate={lastUpdated ? lastUpdated.toLocaleTimeString() : 'N/A'}
                 helpTickets={helpTickets}
                 onToggleNotifications={() => setIsNotificationsOpen(prev => !prev)}
+                maintenanceStatus={maintenanceStatus}
+                onUpdateMaintenanceStatus={onUpdateMaintenanceStatus}
             />
             
             <main className="p-4 sm:p-6 lg:p-8 relative z-0">
