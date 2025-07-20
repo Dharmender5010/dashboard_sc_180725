@@ -3,6 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { UserIcon, RefreshCwIcon, LogOutIcon, BellIcon } from './icons';
 import { HelpTicket } from '../types';
+import { DEVELOPER_EMAIL } from '../services/helpService';
 
 interface HeaderProps {
   userEmail: string;
@@ -14,6 +15,8 @@ interface HeaderProps {
   lastUpdate: string;
   helpTickets: HelpTicket[];
   onToggleNotifications: () => void;
+  maintenanceStatus: 'ON' | 'OFF';
+  onUpdateMaintenanceStatus: (newStatus: 'ON' | 'OFF') => Promise<void>;
 }
 
 const formatDateTime = (date: Date): string => {
@@ -38,17 +41,23 @@ const formatDateTime = (date: Date): string => {
 };
 
 
-export const Header: React.FC<HeaderProps> = ({ userEmail, userName, userRole, onLogout, onRefresh, isRefreshing, lastUpdate, helpTickets, onToggleNotifications }) => {
+export const Header: React.FC<HeaderProps> = ({ userEmail, userName, userRole, onLogout, onRefresh, isRefreshing, lastUpdate, helpTickets, onToggleNotifications, maintenanceStatus, onUpdateMaintenanceStatus }) => {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
+  const isDeveloper = userEmail.toLowerCase() === DEVELOPER_EMAIL;
+
+  const handleToggleMaintenance = () => {
+    const newStatus = maintenanceStatus === 'ON' ? 'OFF' : 'ON';
+    onUpdateMaintenanceStatus(newStatus);
+  };
 
   const pendingTicketsCount = useMemo(() => {
     if (!helpTickets) return 0;
-    if (userRole === 'User') {
+    if (userRole === 'User' && !isDeveloper) {
         return helpTickets.filter(t => t.userEmail.toLowerCase() === userEmail.toLowerCase() && t.status === 'Pending').length;
     }
     // For Admin and Dev, show all pending tickets
     return helpTickets.filter(t => t.status === 'Pending').length;
-  }, [helpTickets, userEmail, userRole]);
+  }, [helpTickets, userEmail, userRole, isDeveloper]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -65,7 +74,7 @@ export const Header: React.FC<HeaderProps> = ({ userEmail, userName, userRole, o
       </div>
       <div className="flex items-center gap-2 sm:gap-4">
         <div id="header-user-info" className="text-right hidden sm:block">
-          <p className="font-semibold text-brand-primary text-sm capitalize -mb-1">{userName} ({userRole})</p>
+          <p className="font-semibold text-brand-primary text-sm capitalize -mb-1">{userName} ({isDeveloper ? 'Developer' : userRole})</p>
           <div className="flex items-center gap-2 justify-end text-gray-600">
             <UserIcon className="h-5 w-5"/>
             <span className="font-medium text-sm">{userEmail}</span>
@@ -88,31 +97,53 @@ export const Header: React.FC<HeaderProps> = ({ userEmail, userName, userRole, o
             </button>
         </div>
 
-        <div className="flex flex-col items-end">
-          <p className="text-xs text-gray-400 mb-1">Auto refresh in every 1 min.</p>
-          <div className="flex items-center gap-2">
-            <motion.button
-              id="header-refresh-button"
-              onClick={onRefresh}
-              disabled={isRefreshing}
-              className="flex items-center gap-2 bg-status-info hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 disabled:bg-blue-300 disabled:cursor-not-allowed"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <RefreshCwIcon className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
-              <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
-            </motion.button>
-            <motion.button
-              id="header-logout-button"
-              onClick={() => onLogout()}
-              className="flex items-center gap-2 bg-status-danger hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <LogOutIcon className="h-4 w-4" />
-              <span>Logout</span>
-            </motion.button>
+        <div className="flex items-center gap-4">
+          <div className="flex flex-col items-end">
+            <p className="text-xs text-gray-400 mb-1">Auto refresh in every 1 min.</p>
+            <div className="flex items-center gap-2">
+              <motion.button
+                id="header-refresh-button"
+                onClick={onRefresh}
+                disabled={isRefreshing}
+                className="flex items-center gap-2 bg-status-info hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300 disabled:bg-blue-300 disabled:cursor-not-allowed"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <RefreshCwIcon className={`h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+                <span>{isRefreshing ? 'Refreshing...' : 'Refresh'}</span>
+              </motion.button>
+              <motion.button
+                id="header-logout-button"
+                onClick={() => onLogout()}
+                className="flex items-center gap-2 bg-status-danger hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors duration-300"
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <LogOutIcon className="h-4 w-4" />
+                <span>Logout</span>
+              </motion.button>
+            </div>
           </div>
+
+          {isDeveloper && (
+            <div className="flex flex-col items-center justify-center bg-gray-100 p-2 rounded-lg border border-gray-300 h-full">
+              <label htmlFor="maintenance-toggle" className="relative inline-flex items-center cursor-pointer group">
+                  <input
+                      type="checkbox"
+                      id="maintenance-toggle"
+                      className="sr-only peer"
+                      checked={maintenanceStatus === 'ON'}
+                      onChange={handleToggleMaintenance}
+                      aria-label="Toggle maintenance mode"
+                  />
+                  <div className="w-11 h-6 bg-gray-300 rounded-full peer peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-red-400 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                  <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-max bg-gray-800 text-white text-xs rounded-md px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+                      Mode: {maintenanceStatus}
+                  </span>
+              </label>
+              <span className="text-xs font-semibold text-gray-600 mt-1">Maintenance</span>
+            </div>
+          )}
         </div>
       </div>
     </header>
