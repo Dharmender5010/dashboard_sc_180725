@@ -332,7 +332,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
                 <div className="mt-4">
                   <button
                     type="submit"
-                    disabled={isOtpLoading}
+                    disabled={isOtpLoading || isGoogleLoading}
                     className="flex w-full justify-center items-center rounded-md bg-brand-primary px-3 py-2.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-brand-dark focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-secondary disabled:bg-indigo-300 disabled:cursor-not-allowed"
                   >
                     {isOtpLoading ? (
@@ -363,7 +363,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
             <div className="flex justify-center items-center min-h-[50px]" id="google-login-button-container">
                  <motion.button
                     onClick={handleCustomGoogleLogin}
-                    disabled={isGoogleLoading}
+                    disabled={isGoogleLoading || isOtpLoading}
                     variants={itemVariants}
                     style={{ width: '350px' }}
                     className="flex justify-center items-center gap-3 rounded-lg bg-white px-3 py-2.5 text-sm font-bold leading-6 text-black shadow-md hover:shadow-lg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-500 disabled:opacity-60 disabled:cursor-not-allowed transition-all border border-gray-300"
