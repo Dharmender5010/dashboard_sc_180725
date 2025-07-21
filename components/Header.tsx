@@ -1,6 +1,7 @@
 
+
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { UserIcon, RefreshCwIcon, LogOutIcon, BellIcon } from './icons';
 import { HelpTicket } from '../types';
 import { DEVELOPER_EMAIL } from '../services/helpService';
@@ -17,6 +18,7 @@ interface HeaderProps {
   onToggleNotifications: () => void;
   maintenanceStatus: 'ON' | 'OFF';
   onUpdateMaintenanceStatus: (newStatus: 'ON' | 'OFF') => Promise<void>;
+  isMaintenanceToggling: boolean;
 }
 
 const formatDateTime = (date: Date): string => {
@@ -40,12 +42,59 @@ const formatDateTime = (date: Date): string => {
     return `${dayName}, ${day}-${month}-${year} ${strHours}:${minutes}:${seconds} ${ampm}`;
 };
 
+// Spinner component that animates only when toggling is in progress
+const MaintenanceSpinner: React.FC<{ isAnimating: boolean }> = ({ isAnimating }) => {
+    const spokes = Array.from({ length: 12 });
 
-export const Header: React.FC<HeaderProps> = ({ userEmail, userName, userRole, onLogout, onRefresh, isRefreshing, lastUpdate, helpTickets, onToggleNotifications, maintenanceStatus, onUpdateMaintenanceStatus }) => {
+    const spinnerVariants: Variants = {
+        spinning: {
+            rotate: 360,
+            transition: {
+                duration: 1,
+                ease: "linear",
+                repeat: Infinity,
+            },
+        },
+        still: {
+            rotate: 0,
+            transition: {
+                duration: 0,
+            },
+        }
+    };
+
+
+    return (
+        <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <motion.g
+                variants={spinnerVariants}
+                animate={isAnimating ? 'spinning' : 'still'}
+                style={{ transformOrigin: '50% 50%' }}
+            >
+                {spokes.map((_, i) => (
+                    <rect
+                        key={i}
+                        x="11"
+                        y="2"
+                        width="3"
+                        height="7"
+                        rx="1.5"
+                        fill="#374151" // A dark gray, close to the reference image's black
+                        transform={`rotate(${i * 30}, 12, 12)`}
+                    />
+                ))}
+            </motion.g>
+        </svg>
+    );
+};
+
+
+export const Header: React.FC<HeaderProps> = ({ userEmail, userName, userRole, onLogout, onRefresh, isRefreshing, lastUpdate, helpTickets, onToggleNotifications, maintenanceStatus, onUpdateMaintenanceStatus, isMaintenanceToggling }) => {
   const [currentDateTime, setCurrentDateTime] = useState(new Date());
   const isDeveloper = userEmail.toLowerCase() === DEVELOPER_EMAIL;
 
   const handleToggleMaintenance = () => {
+    if (isMaintenanceToggling) return;
     const newStatus = maintenanceStatus === 'ON' ? 'OFF' : 'ON';
     onUpdateMaintenanceStatus(newStatus);
   };
@@ -127,17 +176,60 @@ export const Header: React.FC<HeaderProps> = ({ userEmail, userName, userRole, o
           </div>
 
           {isDeveloper && (
-            <div className={`flex flex-col items-center justify-center bg-gray-100 p-2 rounded-lg h-full transition-colors duration-300 ${maintenanceStatus === 'ON' ? 'blinking-border' : 'border-2 border-gray-300'}`}>
-              <label htmlFor="maintenance-toggle" className="relative inline-flex items-center cursor-pointer group">
+            <div className={`flex flex-col items-center justify-center bg-gray-100 p-2 rounded-lg h-full transition-colors duration-300 ${maintenanceStatus === 'ON' ? 'blinking-border' : 'border-2 border-status-success'}`}>
+              <label
+                  htmlFor="maintenance-toggle"
+                  className="relative inline-flex items-center cursor-pointer group"
+              >
                   <input
                       type="checkbox"
                       id="maintenance-toggle"
-                      className="sr-only peer"
+                      className="sr-only"
                       checked={maintenanceStatus === 'ON'}
                       onChange={handleToggleMaintenance}
+                      disabled={isMaintenanceToggling}
                       aria-label="Toggle maintenance mode"
                   />
-                  <div className="w-11 h-6 bg-status-success rounded-full peer peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-red-400 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-red-600"></div>
+                  <div
+                      className={`relative w-20 h-8 flex items-center rounded-full transition-colors duration-300 ${
+                      maintenanceStatus === 'ON' ? 'bg-red-500' : 'bg-green-500'
+                      }`}
+                  >
+                      <motion.div
+                          className="absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg flex items-center justify-center"
+                          layout
+                          transition={{ type: 'spring', stiffness: 700, damping: 30 }}
+                          style={{ left: maintenanceStatus === 'ON' ? 'calc(5rem - 1.75rem)' : '0.25rem' }} // w-20 (5rem) - w-6 (1.5rem) - padding (0.25rem)
+                      >
+                          <MaintenanceSpinner isAnimating={isMaintenanceToggling} />
+                      </motion.div>
+                      <AnimatePresence>
+                          {maintenanceStatus === 'ON' && (
+                              <motion.span
+                                  key="on"
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  exit={{ opacity: 0 }}
+                                  className="absolute left-3 text-xs font-extrabold text-white"
+                              >
+                                  ON
+                              </motion.span>
+                          )}
+                      </AnimatePresence>
+                      <AnimatePresence>
+                          {maintenanceStatus === 'OFF' && (
+                              <motion.span
+                                  key="off"
+                                  initial={{ opacity: 0 }}
+                                  animate={{ opacity: 1 }}
+                                  exit={{ opacity: 0 }}
+                                  className="absolute right-3 text-xs font-extrabold text-white"
+                              >
+                                  OFF
+                              </motion.span>
+                          )}
+                      </AnimatePresence>
+                  </div>
                   <span className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-max bg-gray-800 text-white text-xs rounded-md px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
                       Mode: {maintenanceStatus}
                   </span>
