@@ -1,4 +1,5 @@
 
+
 import React, { useState, useMemo } from 'react';
 import { motion, Variants } from 'framer-motion';
 import { FollowUpData, PerformanceData, HelpTicket } from '../types';
@@ -32,6 +33,7 @@ interface DashboardPageProps {
   onStartTour: () => void;
   maintenanceStatus: 'ON' | 'OFF';
   onUpdateMaintenanceStatus: (newStatus: 'ON' | 'OFF') => Promise<void>;
+  isMaintenanceToggling: boolean;
   countdown: number;
 }
 
@@ -79,7 +81,7 @@ const itemVariants: Variants = {
     },
 };
 
-export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userName, userRole, scUserEmails, data, performanceData, helpTickets, onUpdateTicket, onLogout, onRefresh, isRefreshing, lastUpdated, onStartTour, maintenanceStatus, onUpdateMaintenanceStatus, countdown }) => {
+export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userName, userRole, scUserEmails, data, performanceData, helpTickets, onUpdateTicket, onLogout, onRefresh, isRefreshing, lastUpdated, onStartTour, maintenanceStatus, onUpdateMaintenanceStatus, countdown, isMaintenanceToggling }) => {
     const [filters, setFilters] = useState({ stepCode: '', mobile: '', leadId: '' });
     const [searchTerm, setSearchTerm] = useState('');
     const [dateRange, setDateRange] = useState<{ start: Date | null, end: Date | null }>({ start: null, end: null });
@@ -258,6 +260,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
                 onToggleNotifications={() => setIsNotificationsOpen(prev => !prev)}
                 maintenanceStatus={maintenanceStatus}
                 onUpdateMaintenanceStatus={onUpdateMaintenanceStatus}
+                isMaintenanceToggling={isMaintenanceToggling}
             />
             
             <main className="p-4 sm:p-6 lg:p-8 relative z-0">
