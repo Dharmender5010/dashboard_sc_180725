@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LabelList } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, LabelList } from 'recharts';
 
 interface ChartData {
   name: string;
@@ -27,7 +27,7 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data }) 
           className="w-full h-[90%]"
         >
           <ResponsiveContainer width="100%" height="100%">
-              <LineChart
+              <AreaChart
                 data={data}
                 margin={{
                   top: 20,
@@ -36,6 +36,12 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data }) 
                   bottom: 25,
                 }}
               >
+                <defs>
+                    <linearGradient id="chartGradient" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#4f46e5" stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor="#eef2ff" stopOpacity={0.1}/>
+                    </linearGradient>
+                </defs>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" tick={{ fontSize: 11 }} angle={-40} textAnchor="end" height={60} interval={0}/>
                 <YAxis allowDecimals={false} />
@@ -47,10 +53,19 @@ export const LineChartComponent: React.FC<LineChartComponentProps> = ({ data }) 
                   }}
                 />
                 <Legend verticalAlign="top" wrapperStyle={{paddingBottom: '10px'}}/>
-                <Line type="monotone" dataKey="value" name="Pending Follow-ups" stroke="#4f46e5" strokeWidth={2} activeDot={{ r: 8 }} dot={{r: 4}}>
+                <Area 
+                  type="monotone" 
+                  dataKey="value" 
+                  name="Pending Follow-ups" 
+                  stroke="#4f46e5" 
+                  strokeWidth={2} 
+                  fill="url(#chartGradient)" 
+                  activeDot={{ r: 8, strokeWidth: 2, fill: '#fff' }} 
+                  dot={{ r: 4, stroke: '#4f46e5', strokeWidth: 2, fill: 'white' }}
+                >
                   <LabelList dataKey="value" position="top" style={{ fill: '#374151', fontSize: 12, fontWeight: 'bold' }} />
-                </Line>
-              </LineChart>
+                </Area>
+              </AreaChart>
           </ResponsiveContainer>
         </motion.div>
       ) : (
