@@ -63,7 +63,7 @@ const CircularTimer: React.FC<CircularTimerProps> = ({ value, maxValue, label, c
                     className="-rotate-90"
                 >
                     <circle
-                        stroke="rgba(255, 255, 255, 0.15)"
+                        stroke="rgba(0, 0, 0, 0.1)"
                         fill="transparent"
                         strokeWidth={STROKE_WIDTH}
                         r={RADIUS}
@@ -85,12 +85,12 @@ const CircularTimer: React.FC<CircularTimerProps> = ({ value, maxValue, label, c
                     />
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <span className="text-2xl font-bold text-white tracking-tight font-mono">
+                    <span className="text-2xl font-bold text-slate-700 tracking-tight font-mono">
                         {String(value).padStart(2, '0')}
                     </span>
                 </div>
             </div>
-            <span className="text-[10px] font-semibold text-slate-400 uppercase mt-1 tracking-wider">
+            <span className="text-[10px] font-semibold text-slate-500 uppercase mt-1 tracking-wider">
                 {label}
             </span>
         </div>
@@ -148,7 +148,7 @@ export const PerformanceCards: React.FC<PerformanceCardsProps> = ({ userRole, us
                         initial={{ opacity: 0, y: -20, scale: 0.95 }}
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         transition={{ type: 'spring', stiffness: 200, damping: 20, delay: 0.2 }}
-                        className="flex items-center gap-4 rounded-xl bg-gradient-to-r from-slate-800 to-slate-900 p-4 shadow-lg border border-red-500/30"
+                        className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-lg border-2 border-red-400"
                         id="maintenance-status-display"
                     >
                         <motion.div
@@ -156,14 +156,14 @@ export const PerformanceCards: React.FC<PerformanceCardsProps> = ({ userRole, us
                             transition={{ duration: 10, repeat: Infinity, ease: 'linear' }}
                             className="flex-shrink-0"
                         >
-                            <svg className="h-8 w-8 text-red-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
+                            <svg className="h-8 w-8 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="1.5" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                             </svg>
                         </motion.div>
                         
                         <div className="flex-grow">
-                            <p className="font-bold text-white text-sm">Maintenance Mode</p>
-                            <p className="text-xs text-slate-400">Elapsed Time</p>
+                            <p className="font-bold text-slate-800 text-sm">Maintenance Mode</p>
+                            <p className="text-xs text-slate-500">Elapsed Time</p>
                         </div>
 
                         <div className="flex items-start gap-4">
