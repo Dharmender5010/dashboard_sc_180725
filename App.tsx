@@ -1,5 +1,6 @@
 
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Joyride, { CallBackProps, STATUS, Step, EVENTS } from 'react-joyride';
 import { AnimatePresence } from 'framer-motion';
@@ -42,6 +43,7 @@ const App: React.FC = () => {
     const [maintenanceStatus, setMaintenanceStatus] = useState<'ON' | 'OFF'>('OFF');
     const [countdown, setCountdown] = useState<number>(0); // This is now a duration in seconds, counting up
     const [isMaintenanceToggling, setIsMaintenanceToggling] = useState(false);
+    const [isInitialLoadComplete, setIsInitialLoadComplete] = useState<boolean>(false);
     
     // Tour state
     const [{ run, steps, stepIndex }, setTourState] = useState<{
@@ -87,53 +89,6 @@ const App: React.FC = () => {
         };
     }, [handleUserActivity]);
 
-    useEffect(() => {
-        let timerId: number | undefined;
-
-        if (maintenanceStatus === 'ON') {
-            const startTimeString = localStorage.getItem('maintenanceStartTime');
-            
-            if (startTimeString) {
-                const startTime = new Date(startTimeString).getTime();
-                
-                const updateCountdown = () => {
-                    const now = new Date().getTime();
-                    const elapsedSeconds = Math.floor((now - startTime) / 1000);
-                    setCountdown(elapsedSeconds >= 0 ? elapsedSeconds : 0);
-                };
-                
-                updateCountdown(); // Set initial value immediately
-                timerId = window.setInterval(updateCountdown, 1000);
-
-            } else {
-                // Fallback if localStorage is cleared or it's a new user session during maintenance.
-                // The "official" start time is set when the admin toggles the mode. This provides
-                // a localized timer for this user's session until a refresh after the admin acts.
-                const nowISO = new Date().toISOString();
-                localStorage.setItem('maintenanceStartTime', nowISO);
-                const startTime = new Date(nowISO).getTime();
-
-                const updateCountdown = () => {
-                    const now = new Date().getTime();
-                    const elapsedSeconds = Math.floor((now - startTime) / 1000);
-                    setCountdown(elapsedSeconds >= 0 ? elapsedSeconds : 0);
-                };
-                
-                updateCountdown();
-                timerId = window.setInterval(updateCountdown, 1000);
-            }
-
-        } else {
-            // Maintenance is OFF, clear everything.
-            setCountdown(0); 
-            localStorage.removeItem('maintenanceStartTime');
-        }
-
-        return () => {
-            if(timerId) clearInterval(timerId);
-        };
-    }, [maintenanceStatus]);
-
     const fetchTickets = useCallback(async () => {
         if (userEmail && userRole) {
             try {
@@ -172,8 +127,54 @@ const App: React.FC = () => {
             console.error(err);
         } finally {
             setIsLoading(false);
+            // Set initial load to complete. It's safe to call this multiple times.
+            setIsInitialLoadComplete(true);
         }
     }, [userEmail, userRole, fetchTickets]);
+
+    useEffect(() => {
+        // Don't run this effect until the initial data fetch is complete.
+        // This prevents clearing localStorage based on the initial default state.
+        if (!isInitialLoadComplete) {
+            return;
+        }
+
+        let timerId: number | undefined;
+
+        if (maintenanceStatus === 'ON') {
+            const startTimeString = localStorage.getItem('maintenanceStartTime');
+            
+            if (startTimeString) {
+                const startTime = new Date(startTimeString).getTime();
+                
+                const updateCountdown = () => {
+                    const now = new Date().getTime();
+                    const elapsedSeconds = Math.floor((now - startTime) / 1000);
+                    setCountdown(elapsedSeconds >= 0 ? elapsedSeconds : 0);
+                };
+                
+                updateCountdown(); // Set initial value immediately
+                timerId = window.setInterval(updateCountdown, 1000);
+
+            } else {
+                // If maintenance is ON but there's no start time, something is amiss.
+                // The safest thing to do is show 0 and wait for the next data refresh.
+                // The incorrect fallback logic that created a *new* start time here has been removed.
+                setCountdown(0);
+            }
+
+        } else {
+            // Maintenance is confirmed to be OFF after the initial load.
+            // It's now safe to clear the state and localStorage.
+            setCountdown(0); 
+            localStorage.removeItem('maintenanceStartTime');
+        }
+
+        return () => {
+            if(timerId) clearInterval(timerId);
+        };
+    }, [maintenanceStatus, isInitialLoadComplete]);
+
 
     const handleRefresh = useCallback(() => {
         fetchData();
@@ -401,7 +402,7 @@ const App: React.FC = () => {
     };
 
 
-    if (isLoading && (!allData.length || !userPermissions.length)) {
+    if (isLoading && !isInitialLoadComplete) {
         return <LoadingComponent />;
     }
 
