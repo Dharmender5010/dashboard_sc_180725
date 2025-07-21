@@ -102,7 +102,7 @@ export const PerformanceCards: React.FC<PerformanceCardsProps> = ({ userRole, us
                             <span className="font-bold text-red-700 text-xl tabular-nums">{formatDuration(countdown)}</span>
                         </div>
                         <div className="flex-grow text-right">
-                            <span className="font-bold text-red-700 text-sm tracking-wider animate-blink-text">⚙️ Maintenance Mode Active</span>
+                            <span className="font-bold text-red-700 text-sm tracking-wider animate-blink-text">🛠️ Maintenance Mode Active</span>
                         </div>
                     </motion.div>
                 )}
