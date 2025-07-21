@@ -89,14 +89,44 @@ const App: React.FC = () => {
 
     useEffect(() => {
         let timerId: number | undefined;
+
         if (maintenanceStatus === 'ON') {
-            // This will reset on every status change to ON, fulfilling "every time after start maintenance ON"
-            setCountdown(0);
-            timerId = window.setInterval(() => {
-                setCountdown(prev => prev + 1); // Count up
-            }, 1000);
+            const startTimeString = localStorage.getItem('maintenanceStartTime');
+            
+            if (startTimeString) {
+                const startTime = new Date(startTimeString).getTime();
+                
+                const updateCountdown = () => {
+                    const now = new Date().getTime();
+                    const elapsedSeconds = Math.floor((now - startTime) / 1000);
+                    setCountdown(elapsedSeconds >= 0 ? elapsedSeconds : 0);
+                };
+                
+                updateCountdown(); // Set initial value immediately
+                timerId = window.setInterval(updateCountdown, 1000);
+
+            } else {
+                // Fallback if localStorage is cleared or it's a new user session during maintenance.
+                // The "official" start time is set when the admin toggles the mode. This provides
+                // a localized timer for this user's session until a refresh after the admin acts.
+                const nowISO = new Date().toISOString();
+                localStorage.setItem('maintenanceStartTime', nowISO);
+                const startTime = new Date(nowISO).getTime();
+
+                const updateCountdown = () => {
+                    const now = new Date().getTime();
+                    const elapsedSeconds = Math.floor((now - startTime) / 1000);
+                    setCountdown(elapsedSeconds >= 0 ? elapsedSeconds : 0);
+                };
+                
+                updateCountdown();
+                timerId = window.setInterval(updateCountdown, 1000);
+            }
+
         } else {
-            setCountdown(0); // Reset when maintenance is OFF
+            // Maintenance is OFF, clear everything.
+            setCountdown(0); 
+            localStorage.removeItem('maintenanceStartTime');
         }
 
         return () => {
@@ -338,6 +368,13 @@ const App: React.FC = () => {
 
             try {
                 await updateMaintenanceStatus(newStatus, userEmail);
+
+                if (newStatus === 'ON') {
+                    localStorage.setItem('maintenanceStartTime', new Date().toISOString());
+                } else {
+                    localStorage.removeItem('maintenanceStartTime');
+                }
+
                 // After updating, refresh all data to reflect the change everywhere.
                 await handleRefresh(); 
 
