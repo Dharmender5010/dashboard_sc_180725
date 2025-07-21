@@ -1,7 +1,8 @@
 
 
+
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion, AnimatePresence, Variants } from 'framer-motion';
+import { motion, AnimatePresence, Variants, useAnimation } from 'framer-motion';
 import { UserIcon, RefreshCwIcon, LogOutIcon, BellIcon } from './icons';
 import { HelpTicket } from '../types';
 import { DEVELOPER_EMAIL } from '../services/helpService';
@@ -45,30 +46,30 @@ const formatDateTime = (date: Date): string => {
 // Spinner component that animates only when toggling is in progress
 const MaintenanceSpinner: React.FC<{ isAnimating: boolean }> = ({ isAnimating }) => {
     const spokes = Array.from({ length: 12 });
+    const controls = useAnimation();
 
-    const spinnerVariants: Variants = {
-        spinning: {
-            rotate: 360,
-            transition: {
-                duration: 1,
-                ease: "linear",
-                repeat: Infinity,
-            },
-        },
-        still: {
-            rotate: 0,
-            transition: {
-                duration: 0,
-            },
+    useEffect(() => {
+        if (isAnimating) {
+            controls.start({
+                rotate: 360,
+                transition: {
+                    duration: 1,
+                    ease: "linear",
+                    repeat: Infinity,
+                },
+            });
+        } else {
+            // Immediately stop any running animation and reset rotation.
+            controls.stop();
+            controls.set({ rotate: 0 });
         }
-    };
+    }, [isAnimating, controls]);
 
 
     return (
         <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <motion.g
-                variants={spinnerVariants}
-                animate={isAnimating ? 'spinning' : 'still'}
+                animate={controls}
                 style={{ transformOrigin: '50% 50%' }}
             >
                 {spokes.map((_, i) => (
