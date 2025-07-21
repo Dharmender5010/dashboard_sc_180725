@@ -191,7 +191,7 @@ export const Header: React.FC<HeaderProps> = ({ userEmail, userName, userRole, o
                       aria-label="Toggle maintenance mode"
                   />
                   <div
-                      className={`relative w-20 h-8 flex items-center rounded-full transition-colors duration-300 ${
+                      className={`relative w-16 h-8 flex items-center rounded-full transition-colors duration-300 ${
                       maintenanceStatus === 'ON' ? 'bg-red-500' : 'bg-green-500'
                       }`}
                   >
@@ -199,7 +199,7 @@ export const Header: React.FC<HeaderProps> = ({ userEmail, userName, userRole, o
                           className="absolute top-1 w-6 h-6 bg-white rounded-full shadow-lg flex items-center justify-center"
                           layout
                           transition={{ type: 'spring', stiffness: 700, damping: 30 }}
-                          style={{ left: maintenanceStatus === 'ON' ? 'calc(5rem - 1.75rem)' : '0.25rem' }} // w-20 (5rem) - w-6 (1.5rem) - padding (0.25rem)
+                          style={{ left: maintenanceStatus === 'ON' ? 'calc(4rem - 1.75rem)' : '0.25rem' }}
                       >
                           <MaintenanceSpinner isAnimating={isMaintenanceToggling} />
                       </motion.div>
@@ -210,7 +210,7 @@ export const Header: React.FC<HeaderProps> = ({ userEmail, userName, userRole, o
                                   initial={{ opacity: 0 }}
                                   animate={{ opacity: 1 }}
                                   exit={{ opacity: 0 }}
-                                  className="absolute left-3 text-xs font-extrabold text-white"
+                                  className="absolute left-2 text-xs font-extrabold text-white"
                               >
                                   ON
                               </motion.span>
@@ -223,7 +223,7 @@ export const Header: React.FC<HeaderProps> = ({ userEmail, userName, userRole, o
                                   initial={{ opacity: 0 }}
                                   animate={{ opacity: 1 }}
                                   exit={{ opacity: 0 }}
-                                  className="absolute right-3 text-xs font-extrabold text-white"
+                                  className="absolute right-2 text-xs font-extrabold text-white"
                               >
                                   OFF
                               </motion.span>
