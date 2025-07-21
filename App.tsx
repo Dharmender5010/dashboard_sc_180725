@@ -41,6 +41,7 @@ const App: React.FC = () => {
     const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
     const [maintenanceStatus, setMaintenanceStatus] = useState<'ON' | 'OFF'>('OFF');
     const [countdown, setCountdown] = useState<number>(0); // This is now a duration in seconds, counting up
+    const [isMaintenanceToggling, setIsMaintenanceToggling] = useState(false);
     
     // Tour state
     const [{ run, steps, stepIndex }, setTourState] = useState<{
@@ -322,12 +323,14 @@ const App: React.FC = () => {
         });
 
         if (result.isConfirmed) {
+            setIsMaintenanceToggling(true);
             // Show a loading indicator immediately while the backend process runs.
             Swal.fire({
                 title: 'Processing Update',
                 html: `Turning maintenance mode <b>${newStatus}</b>. This may take a moment.`,
                 timerProgressBar: true,
                 allowOutsideClick: false,
+                allowEscapeKey: false,
                 didOpen: () => {
                     Swal.showLoading();
                 }
@@ -354,6 +357,8 @@ const App: React.FC = () => {
                     title: 'Update Failed',
                     text: (err as Error).message,
                 });
+            } finally {
+                setIsMaintenanceToggling(false);
             }
         }
     };
@@ -417,6 +422,7 @@ const App: React.FC = () => {
                     maintenanceStatus={maintenanceStatus}
                     onUpdateMaintenanceStatus={handleUpdateMaintenanceStatus}
                     countdown={countdown}
+                    isMaintenanceToggling={isMaintenanceToggling}
                 />
             )}
         </>
