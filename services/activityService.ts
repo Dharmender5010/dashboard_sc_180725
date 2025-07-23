@@ -1,7 +1,6 @@
 // A service to handle logging user activity like logins and logouts.
 // For the backend Google Apps Script, see services/googleAppsScript.ts
-
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxHVsJzkz6k8BjFkgTyeorvRggo8YTL7wScxgLpc-Kmi6PZLY55H2htT_1z_oFRU7rk/exec';
+import { WEB_APP_URL } from './config';
 
 /**
  * Logs a user activity event (Login/Logout) to the backend Google Sheet.
@@ -14,7 +13,7 @@ const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxHVsJzkz6k8BjFkgTy
  */
 export const logActivity = (email: string, name: string, activity: 'Login' | 'Logout', loginMethod: 'Google' | 'OTP' | null = null): void => {
     if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR_URL_HERE')) {
-        console.error('Activity logging service is not configured. Please set the WEB_APP_URL.');
+        console.error('Activity logging service is not configured. Please set the WEB_APP_URL in services/config.ts');
         return;
     }
 
