@@ -1,7 +1,7 @@
 // A service to handle logging user activity like logins and logouts.
 // This service uses the same CONSOLIDATED Google Apps Script as other services.
 
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwCN4XGeKTP-L0L7lfDlSA6kFb58ncflXN0YsORl5GHLVq4V1m98aeJnhmKtAI2yEn8/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby1BpcacGOooLY7zNuMglkgLqOMzdi2FZ_zoIf8IFUUB7pDhx6qZVIrSpbxHRaFvFfC/exec';
 
 /**
  * Logs a user activity event (Login/Logout) to the backend Google Sheet.
