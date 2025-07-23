@@ -1,9 +1,7 @@
 // A service to handle OTP (One-Time Password) login requests.
 // For the backend Google Apps Script, see services/googleAppsScript.ts
+import { WEB_APP_URL } from './config';
 
-// --- CONFIGURATION ---
-// PASTE YOUR **SINGLE, CONSOLIDATED** DEPLOYED WEB APP URL HERE.
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxHVsJzkz6k8BjFkgTyeorvRggo8YTL7wScxgLpc-Kmi6PZLY55H2htT_1z_oFRU7rk/exec';
 
 const makeApiCall = async (payload: object): Promise<any> => {
     if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR_URL_HERE')) {
