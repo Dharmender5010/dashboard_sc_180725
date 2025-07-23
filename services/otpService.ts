@@ -6,23 +6,24 @@
 //    Go to script.google.com/create
 //
 // 2. PASTE THE SCRIPT:
-//    Erase the default content and paste the NEW CONSOLIDATED SCRIPT provided in the AI chat.
+//    Erase the default content and paste the NEW CONSOLIDATED SCRIPT provided in `services/helpService.ts`.
 //    The script starts with "// --- Consolidated Google Apps Script (Code.gs) ---"
 //
 // 3. DEPLOY & AUTHORIZE:
 //    - Click "Deploy" > "New deployment" as a "Web app".
+//    - Set "Execute as" to "Me"
 //    - Set "Who has access" to "Anyone". This is required for the app to reach it.
 //    - Click "Deploy". Authorize the script when prompted.
 //
 // 4. GET & PASTE URL:
 //    - After deploying, copy the "Web app URL".
-//    - Paste the single copied URL into the `WEB_APP_URL` constant below, and also in `helpService.ts`.
+//    - Paste the single copied URL into the `WEB_APP_URL` constant below, and also in `services/helpService.ts` and `services/activityService.ts`.
 //
-// NOTE: This file (otpService.ts) is for frontend code. DO NOT paste the Apps Script code here.
+// NOTE: This file (otpService.ts) is for frontend code. DO NOT paste the Apps Script code here. The full script is in `helpService.ts`.
 
 // --- CONFIGURATION ---
 // PASTE YOUR **SINGLE, CONSOLIDATED** DEPLOYED WEB APP URL HERE.
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwCN4XGeKTP-L0L7lfDlSA6kFb58ncflXN0YsORl5GHLVq4V1m98aeJnhmKtAI2yEn8/exec'; // This URL must be from your new, consolidated script deployment.
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby1BpcacGOooLY7zNuMglkgLqOMzdi2FZ_zoIf8IFUUB7pDhx6qZVIrSpbxHRaFvFfC/exec'; // This URL must be from your new, consolidated script deployment.
 
 const makeApiCall = async (payload: object): Promise<any> => {
     if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR_URL_HERE')) {
