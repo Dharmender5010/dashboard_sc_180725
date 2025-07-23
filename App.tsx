@@ -1,6 +1,7 @@
 
 
 
+
 import React, { useState, useEffect, useCallback } from 'react';
 import Joyride, { CallBackProps, STATUS, Step, EVENTS } from 'react-joyride';
 import { AnimatePresence } from 'framer-motion';
@@ -15,6 +16,7 @@ import { FollowUpData, UserPermission, PerformanceData, HelpTicket } from './typ
 import { LoadingComponent } from './components/LoadingComponent';
 import Screensaver from './components/Screensaver';
 import { MaintenancePage } from './components/MaintenancePage';
+import { logActivity } from './services/activityService';
 
 
 // Declare Swal for TypeScript since it's loaded from a script tag
@@ -233,6 +235,8 @@ const App: React.FC = () => {
             const role = userPermission.userType as 'Admin' | 'User';
             const name = userPermission.name;
             
+            logActivity(trimmedEmail, name, 'Login');
+
             localStorage.setItem('userEmail', trimmedEmail);
             localStorage.setItem('userRole', role);
             localStorage.setItem('userName', name);
@@ -262,6 +266,11 @@ const App: React.FC = () => {
 
     const handleLogout = (showSuccessMessage = true) => {
         if (run) handleTourEnd();
+
+        if (userEmail && userName) {
+            logActivity(userEmail, userName, 'Logout');
+        }
+
         if (showSuccessMessage) {
             Swal.fire({
               position: "center",
