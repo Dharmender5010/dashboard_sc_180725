@@ -1,5 +1,5 @@
 // A service to handle logging user activity like logins and logouts.
-// This service uses the same CONSOLIDATED Google Apps Script as other services.
+// For the backend Google Apps Script, see services/googleAppsScript.ts
 
 const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby1BpcacGOooLY7zNuMglkgLqOMzdi2FZ_zoIf8IFUUB7pDhx6qZVIrSpbxHRaFvFfC/exec';
 
@@ -10,8 +10,9 @@ const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby1BpcacGOooLY7zNuM
  * @param email The user's email.
  * @param name The user's name.
  * @param activity The type of activity ('Login' or 'Logout').
+ * @param loginMethod The method used for login ('Google' or 'OTP'), or null for logout.
  */
-export const logActivity = (email: string, name: string, activity: 'Login' | 'Logout'): void => {
+export const logActivity = (email: string, name: string, activity: 'Login' | 'Logout', loginMethod: 'Google' | 'OTP' | null = null): void => {
     if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR_URL_HERE')) {
         console.error('Activity logging service is not configured. Please set the WEB_APP_URL.');
         return;
@@ -22,6 +23,7 @@ export const logActivity = (email: string, name: string, activity: 'Login' | 'Lo
         email,
         name,
         activity,
+        loginMethod,
     };
 
     try {
