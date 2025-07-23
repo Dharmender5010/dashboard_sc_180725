@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { ExclamationCircleIcon, AtSymbolIcon, KeyIcon, XMarkIcon } from './icons';
@@ -15,7 +13,7 @@ declare const google: any;
 declare const Swal: any;
 
 interface LoginPageProps {
-  onLogin: (email: string) => void;
+  onLogin: (email: string, loginMethod: 'Google' | 'OTP') => void;
   error?: string | null;
   onStartTour: () => void;
 }
@@ -126,7 +124,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
                         const userInfo = await userInfoResponse.json();
 
                         if (userInfo && userInfo.email) {
-                            onLogin(userInfo.email);
+                            onLogin(userInfo.email, 'Google');
                         } else {
                             throw new Error('Email not found in Google user profile.');
                         }
@@ -209,7 +207,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
     const MASTER_OTP = '979797';
     if (isDeveloperLogin) {
         if (otp === MASTER_OTP) {
-            onLogin(email);
+            onLogin(email, 'OTP');
         } else {
             setOtpError("Invalid Master OTP.");
         }
@@ -220,7 +218,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
     try {
       const isVerified = await verifyOtpRequest(email, otp);
       if(isVerified) {
-        onLogin(email);
+        onLogin(email, 'OTP');
       } else {
         setOtpError("Invalid or expired OTP. Please try again.");
       }
