@@ -1,7 +1,3 @@
-
-
-
-
 import React, { useState, useEffect, useCallback } from 'react';
 import Joyride, { CallBackProps, STATUS, Step, EVENTS } from 'react-joyride';
 import { AnimatePresence } from 'framer-motion';
@@ -218,7 +214,7 @@ const App: React.FC = () => {
         }
     }, [run, stepIndex, steps]);
 
-    const handleLogin = (email: string) => {
+    const handleLogin = (email: string, loginMethod: 'Google' | 'OTP') => {
         const normalizedEmail = email.toLowerCase().trim();
         const userPermission = userPermissions.find(p => p.email.toLowerCase() === normalizedEmail);
 
@@ -235,7 +231,7 @@ const App: React.FC = () => {
             const role = userPermission.userType as 'Admin' | 'User';
             const name = userPermission.name;
             
-            logActivity(trimmedEmail, name, 'Login');
+            logActivity(trimmedEmail, name, 'Login', loginMethod);
 
             localStorage.setItem('userEmail', trimmedEmail);
             localStorage.setItem('userRole', role);
@@ -268,7 +264,7 @@ const App: React.FC = () => {
         if (run) handleTourEnd();
 
         if (userEmail && userName) {
-            logActivity(userEmail, userName, 'Logout');
+            logActivity(userEmail, userName, 'Logout', null);
         }
 
         if (showSuccessMessage) {
