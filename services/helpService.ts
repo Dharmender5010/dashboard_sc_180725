@@ -1,10 +1,9 @@
 // For the backend Google Apps Script, see services/googleAppsScript.ts
 
 import { HelpTicket } from '../types';
+import { WEB_APP_URL } from './config';
 
 // --- CONFIGURATION ---
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbxHVsJzkz6k8BjFkgTyeorvRggo8YTL7wScxgLpc-Kmi6PZLY55H2htT_1z_oFRU7rk/exec';
-
 export const DEVELOPER_EMAIL = "mis@bonhoeffermachines.in";
 
 interface ScreenshotData {
@@ -34,7 +33,7 @@ const handleApiError = (error: unknown, context: string): Error => {
 export const sendHelpRequest = async (payload: HelpRequestPayload): Promise<any> => {
     if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR_URL_HERE')) {
         const errorMessage = 'The "Need Help?" feature is not yet configured. Please contact the administrator to set up the support service.';
-        console.error('Help Service Error:', errorMessage, 'The `WEB_APP_URL` in `services/helpService.ts` must be set to a valid Google Apps Script URL.');
+        console.error('Help Service Error:', errorMessage, 'The `WEB_APP_URL` in `services/config.ts` must be set to a valid Google Apps Script URL.');
         throw new Error(errorMessage);
     }
 
