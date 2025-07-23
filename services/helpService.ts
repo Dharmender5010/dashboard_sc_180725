@@ -1,10 +1,11 @@
 /*
 // --- CONSOLIDATED GOOGLE APPS SCRIPT (Code.gs) ---
-// This single script handles all backend functionality: OTP Login, Help Desk, and Maintenance Mode.
+// This single script handles all backend functionality: OTP Login, Help Desk, Login History, and Maintenance Mode.
 // 1. In your Google Sheet ("1JiwnMWCok3HumvYQA3IduXSFbAkkbGC0aBFFNK6Lti8"), ensure you have these sheets:
 //    - "Need_Help": With headers: TicketID, Timestamp, UserEmail, UserName, Issue, ScreenshotLink, Status, LastUpdated, ResolvedBy
 //    - "OTP_Log": No headers needed, will be populated automatically.
 //    - "Web_Permissions": With headers: userType, email, name.
+//    - "Login_History": With headers: Timestamp, Email, Name, Activity
 // 2. Add a maintenance flag to "Web_Permissions": Create a row with userType='Maintenance', email='status', name='OFF' (or 'ON').
 // 3. Paste this entire script into your Apps Script project, replacing any old code.
 // 4. Update the DRIVE_FOLDER_ID and BACKEND_SECRET_KEY variables below.
@@ -21,6 +22,7 @@ const SPREADSHEET_ID = '1JiwnMWCok3HumvYQA3IduXSFbAkkbGC0aBFFNK6Lti8';
 const HELP_TICKETS_SHEET_NAME = 'Need_Help';
 const OTP_LOG_SHEET_NAME = 'OTP_Log';
 const PERMISSIONS_SHEET_NAME = 'Web_Permissions';
+const LOGIN_HISTORY_SHEET_NAME = 'Login_History'; // New Sheet
 const DEVELOPER_EMAIL = "mis@bonhoeffermachines.in";
 // IMPORTANT: Paste the ID of your Google Drive folder for screenshots here.
 const DRIVE_FOLDER_ID = '1r4_tT807APYOq0XRUEkJLNbAAJgbmf41'; 
@@ -85,6 +87,7 @@ function doPost(e) {
       case 'get_help_tickets': result = handleGetHelpTickets(payload); break;
       case 'update_ticket_status': result = handleUpdateTicketStatus(payload); break;
       case 'set_maintenance_mode': result = handleSetMaintenanceMode(payload); break;
+      case 'log_user_activity': result = handleLogUserActivity(payload); break; // New Action
       default: throw new Error("Invalid action specified.");
     }
     return ContentService.createTextOutput(JSON.stringify({ success: true, ...result })).setMimeType(ContentService.MimeType.JSON);
@@ -92,6 +95,24 @@ function doPost(e) {
     Logger.log(error.toString());
     return ContentService.createTextOutput(JSON.stringify({ success: false, message: error.toString() })).setMimeType(ContentService.MimeType.JSON);
   }
+}
+
+// --- LOGIN HISTORY --- (New Function)
+function handleLogUserActivity(payload) {
+  const { email, name, activity } = payload;
+  if (!email || !name || !activity) {
+    throw new Error("Missing required parameters for logging activity (email, name, activity).");
+  }
+  const sheet = getSheet(LOGIN_HISTORY_SHEET_NAME);
+  const timestamp = new Date();
+
+  // Check for headers and add if missing
+  if(sheet.getLastRow() === 0) {
+      sheet.appendRow(['Timestamp', 'Email', 'Name', 'Activity']);
+  }
+
+  sheet.appendRow([timestamp, email, name, activity]);
+  return { message: "Activity logged successfully." };
 }
 
 // --- MAINTENANCE MODE ---
@@ -286,7 +307,7 @@ function handleVerifyOtp(payload) {
 import { HelpTicket } from '../types';
 
 // --- CONFIGURATION ---
-const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwCN4XGeKTP-L0L7lfDlSA6kFb58ncflXN0YsORl5GHLVq4V1m98aeJnhmKtAI2yEn8/exec';
+const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycby1BpcacGOooLY7zNuMglkgLqOMzdi2FZ_zoIf8IFUUB7pDhx6qZVIrSpbxHRaFvFfC/exec';
 
 export const DEVELOPER_EMAIL = "mis@bonhoeffermachines.in";
 
