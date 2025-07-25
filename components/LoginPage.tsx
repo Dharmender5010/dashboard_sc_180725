@@ -204,7 +204,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
       return;
     }
     
-    const MASTER_OTP = '979797';
+    const MASTER_OTP = '777777';
     if (isDeveloperLogin) {
         if (otp === MASTER_OTP) {
             onLogin(email, 'OTP');
