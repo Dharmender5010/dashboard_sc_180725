@@ -1,7 +1,7 @@
 
 
   import React, { useState, useEffect, useMemo } from 'react';
-  import { motion, AnimatePresence, Variants, useAnimation } from 'framer-motion';
+  import { motion, AnimatePresence, Variants } from 'framer-motion';
   import { UserIcon, RefreshCwIcon, LogOutIcon, BellIcon } from './icons';
   import { HelpTicket } from '../types';
   import { DEVELOPER_EMAIL } from '../services/helpService';
@@ -42,48 +42,47 @@
       return `${dayName}, ${day}-${month}-${year} ${strHours}:${minutes}:${seconds} ${ampm}`;
   };
 
-  // Spinner component that animates only when toggling is in progress
+  // Spinner component using declarative variants for robustness in production builds.
   const MaintenanceSpinner: React.FC<{ isAnimating: boolean }> = ({ isAnimating }) => {
-      const dots = Array.from({ length: 8 });
-      const controls = useAnimation();
+    const dots = Array.from({ length: 8 });
+    
+    const spinnerVariants: Variants = {
+        spinning: {
+            rotate: 360,
+            transition: {
+                duration: 1,
+                ease: "linear",
+                repeat: Infinity,
+            },
+        },
+        idle: {
+            rotate: 0,
+            transition: {
+                duration: 0.2
+            }
+        }
+    };
 
-      useEffect(() => {
-          if (isAnimating) {
-              controls.start({
-                  rotate: 360,
-                  transition: {
-                      duration: 1,
-                      ease: "linear",
-                      repeat: Infinity,
-                  },
-              });
-          } else {
-              // Immediately stop any running animation and reset rotation.
-              controls.stop();
-              controls.set({ rotate: 0 });
-          }
-      }, [isAnimating, controls]);
-
-
-      return (
-          <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <motion.g
-                  animate={controls}
-                  style={{ transformOrigin: '50% 50%' }}
-              >
-                  {dots.map((_, i) => (
-                      <circle
-                          key={i}
-                          cx="12"
-                          cy="5"
-                          r="2"
-                          fill="#374151"
-                          transform={`rotate(${i * 45}, 12, 12)`}
-                      />
-                  ))}
-              </motion.g>
-          </svg>
-      );
+    return (
+        <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <motion.g
+                variants={spinnerVariants}
+                animate={isAnimating ? "spinning" : "idle"}
+                style={{ transformOrigin: '50% 50%' }}
+            >
+                {dots.map((_, i) => (
+                    <circle
+                        key={i}
+                        cx="12"
+                        cy="5"
+                        r="2"
+                        fill="#374151"
+                        transform={`rotate(${i * 45}, 12, 12)`}
+                    />
+                ))}
+            </motion.g>
+        </svg>
+    );
   };
 
 
