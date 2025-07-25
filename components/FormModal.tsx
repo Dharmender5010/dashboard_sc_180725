@@ -109,16 +109,22 @@ export const FormModal: React.FC<FormModalProps> = ({ isOpen, onClose, url }) =>
                     >
                         <header className="p-4 border-b border-gray-200 flex justify-between items-center bg-white rounded-t-xl shrink-0">
                             <h2 className="text-lg font-bold text-gray-800">Complete Action</h2>
-                            <div className="flex items-center gap-1">
+                            <div className="flex items-center gap-2">
                                 <ActionButton label={isCopied ? "Copied!" : "Copy Link"} onClick={handleCopyLink}>
                                     <ClipboardIcon className="h-5 w-5" />
                                 </ActionButton>
                                 <ActionButton label="Open in new tab" onClick={handleOpenInNewTab}>
                                     <ArrowTopRightOnSquareIcon className="h-5 w-5" />
                                 </ActionButton>
-                                 <ActionButton label="Close" onClick={onClose}>
-                                    <XMarkIcon className="h-6 w-6" />
-                                </ActionButton>
+                                 <button
+                                    type="button"
+                                    onClick={onClose}
+                                    className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white bg-gray-700 hover:bg-gray-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
+                                    aria-label="Close"
+                                >
+                                    <XMarkIcon className="h-5 w-5" />
+                                    <span>Close</span>
+                                </button>
                             </div>
                         </header>
 
