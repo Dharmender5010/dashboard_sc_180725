@@ -1,11 +1,13 @@
 
+
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { FollowUpData } from '../types';
 import { ArrowUpDownIcon, CheckCircleIcon } from './icons';
 
 interface DataTableProps {
   data: FollowUpData[];
-  onOpenFormModal: (url: string) => void;
+  onOpenFormModal: (url: string, leadId: string) => void;
+  clickedLeadInfo: Map<string, { timestamp: number }>;
 }
 
 type SortKey = keyof FollowUpData;
@@ -35,7 +37,7 @@ const getColumnWidths = (): Record<string, number> => ({
 });
 
 
-export const DataTable: React.FC<DataTableProps> = ({ data, onOpenFormModal }) => {
+export const DataTable: React.FC<DataTableProps> = ({ data, onOpenFormModal, clickedLeadInfo }) => {
     const [sortConfig, setSortConfig] = useState<{ key: SortKey; direction: SortDirection } | null>({ key: 'daysOfFollowUp', direction: 'desc'});
     const [currentPage, setCurrentPage] = useState(1);
     
@@ -190,14 +192,35 @@ export const DataTable: React.FC<DataTableProps> = ({ data, onOpenFormModal }) =
                                     <td key={header.key} className="px-6 py-4 align-top">
                                         {header.key === 'link' ? (
                                              item.link ? (
-                                                <button
-                                                    onClick={() => onOpenFormModal(item.link)}
-                                                    className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-brand-primary font-semibold rounded-full hover:bg-blue-200 transition-colors duration-200 text-sm"
-                                                    aria-label={`Mark done for lead ${item.leadId}`}
-                                                >
-                                                    <span>Mark Done</span>
-                                                    <CheckCircleIcon className="h-4 w-4" />
-                                                </button>
+                                                (() => {
+                                                    const clickInfo = clickedLeadInfo.get(item.leadId);
+                                                    const isClicked = !!clickInfo;
+                                                    const timestamp = isClicked ? new Date(clickInfo.timestamp).toLocaleString(undefined, {
+                                                        month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true
+                                                    }) : null;
+
+                                                    return (
+                                                        <div className="flex flex-col items-start">
+                                                            <button
+                                                                onClick={() => onOpenFormModal(item.link, item.leadId)}
+                                                                className={`flex items-center gap-2 px-4 py-2 font-semibold rounded-full transition-colors duration-200 text-sm ${
+                                                                    isClicked
+                                                                        ? 'bg-emerald-100 text-emerald-800 hover:bg-emerald-200' // Clicked state
+                                                                        : 'bg-blue-100 text-brand-primary hover:bg-blue-200' // Default state
+                                                                }`}
+                                                                aria-label={`Mark done for lead ${item.leadId}`}
+                                                            >
+                                                                <span>{isClicked ? 'Submitted' : 'Mark Done'}</span>
+                                                                <CheckCircleIcon className="h-4 w-4" />
+                                                            </button>
+                                                            {isClicked && (
+                                                                <span className="text-xs text-gray-500 mt-1.5 ml-1" title={new Date(clickInfo.timestamp).toLocaleString()}>
+                                                                    {timestamp}
+                                                                </span>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })()
                                             ) : (
                                                 '-'
                                             )
