@@ -1,6 +1,5 @@
 
 
-
   import React, { useState, useEffect, useMemo } from 'react';
   import { motion, AnimatePresence, Variants, useAnimation } from 'framer-motion';
   import { UserIcon, RefreshCwIcon, LogOutIcon, BellIcon } from './icons';
@@ -45,7 +44,7 @@
 
   // Spinner component that animates only when toggling is in progress
   const MaintenanceSpinner: React.FC<{ isAnimating: boolean }> = ({ isAnimating }) => {
-      const spokes = Array.from({ length: 12 });
+      const dots = Array.from({ length: 8 });
       const controls = useAnimation();
 
       useEffect(() => {
@@ -72,16 +71,14 @@
                   animate={controls}
                   style={{ transformOrigin: '50% 50%' }}
               >
-                  {spokes.map((_, i) => (
-                      <rect
+                  {dots.map((_, i) => (
+                      <circle
                           key={i}
-                          x="11"
-                          y="2"
-                          width="3"
-                          height="7"
-                          rx="1.5"
-                          fill="#374151" // A dark gray, close to the reference image's black
-                          transform={`rotate(${i * 30}, 12, 12)`}
+                          cx="12"
+                          cy="5"
+                          r="2"
+                          fill="#374151"
+                          transform={`rotate(${i * 45}, 12, 12)`}
                       />
                   ))}
               </motion.g>
