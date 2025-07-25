@@ -46,3 +46,8 @@ export interface HelpTicket {
   lastUpdated: string;
   resolvedBy: string;
 }
+
+export interface ClickInfo {
+    timestamp: number;
+    date: string; // Format: "YYYY-MM-DD"
+}
