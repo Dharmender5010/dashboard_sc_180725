@@ -1,8 +1,8 @@
 
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, Variants } from 'framer-motion';
-import { FollowUpData, PerformanceData, HelpTicket } from '../types';
+import { FollowUpData, PerformanceData, HelpTicket, ClickInfo } from '../types';
 import { Header } from './Header';
 import { BarChartComponent } from './BarChartComponent';
 import { LineChartComponent } from './LineChartComponent';
@@ -89,15 +89,34 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
     const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [formModalUrl, setFormModalUrl] = useState<string | null>(null);
-    const [clickedLeadInfo, setClickedLeadInfo] = useState<Map<string, { timestamp: number }>>(() => {
+    const [clickedLeadInfo, setClickedLeadInfo] = useState<Map<string, ClickInfo>>(() => {
         try {
             const item = sessionStorage.getItem('clickedLeadInfo');
-            // Stored as an array of [key, value] pairs
             return item ? new Map(JSON.parse(item)) : new Map();
         } catch {
             return new Map();
         }
     });
+
+    useEffect(() => {
+        const today = new Date().toISOString().split('T')[0];
+        const newMap = new Map(clickedLeadInfo);
+        let hasChanges = false;
+
+        for (const [leadId, info] of newMap.entries()) {
+            // Check if info object exists and has a 'date' property.
+            // If not, or if the date is not today, it's stale.
+            if (!info || !info.date || info.date !== today) {
+                newMap.delete(leadId);
+                hasChanges = true;
+            }
+        }
+
+        if (hasChanges) {
+            setClickedLeadInfo(newMap);
+            sessionStorage.setItem('clickedLeadInfo', JSON.stringify(Array.from(newMap.entries())));
+        }
+    }, [lastUpdated]); // Depend on lastUpdated to trigger the check periodically.
 
 
     const handleFilterChange = (filterName: keyof typeof filters, value: string) => {
@@ -125,8 +144,9 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
             setFormModalUrl(url);
         }
         setClickedLeadInfo(prev => {
+            const today = new Date().toISOString().split('T')[0];
             const newMap = new Map(prev);
-            newMap.set(leadId, { timestamp: Date.now() });
+            newMap.set(leadId, { timestamp: Date.now(), date: today });
             sessionStorage.setItem('clickedLeadInfo', JSON.stringify(Array.from(newMap.entries())));
             return newMap;
         });
