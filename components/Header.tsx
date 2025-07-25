@@ -1,7 +1,7 @@
 
 
   import React, { useState, useEffect, useMemo } from 'react';
-  import { motion, AnimatePresence, Variants } from 'framer-motion';
+  import { motion, AnimatePresence } from 'framer-motion';
   import { UserIcon, RefreshCwIcon, LogOutIcon, BellIcon } from './icons';
   import { HelpTicket } from '../types';
   import { DEVELOPER_EMAIL } from '../services/helpService';
@@ -42,45 +42,23 @@
       return `${dayName}, ${day}-${month}-${year} ${strHours}:${minutes}:${seconds} ${ampm}`;
   };
 
-  // Spinner component using declarative variants for robustness in production builds.
-  const MaintenanceSpinner: React.FC<{ isAnimating: boolean }> = ({ isAnimating }) => {
+  // Spinner component using pure CSS for robustness in production builds.
+  const MaintenanceSpinner: React.FC<{ isToggling: boolean }> = ({ isToggling }) => {
     const dots = Array.from({ length: 8 });
-    
-    const spinnerVariants: Variants = {
-        spinning: {
-            rotate: 360,
-            transition: {
-                duration: 1,
-                ease: "linear",
-                repeat: Infinity,
-            },
-        },
-        idle: {
-            rotate: 0,
-            transition: {
-                duration: 0.2
-            }
-        }
-    };
-
     return (
         <svg width="16" height="16" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <motion.g
-                variants={spinnerVariants}
-                animate={isAnimating ? "spinning" : "idle"}
-                style={{ transformOrigin: '50% 50%' }}
-            >
+            <g className={isToggling ? 'animate-spin-dots' : ''}>
                 {dots.map((_, i) => (
                     <circle
                         key={i}
                         cx="12"
                         cy="5"
-                        r="2"
+                        r="2.5"
                         fill="#374151"
                         transform={`rotate(${i * 45}, 12, 12)`}
                     />
                 ))}
-            </motion.g>
+            </g>
         </svg>
     );
   };
@@ -198,7 +176,7 @@
                             transition={{ type: 'spring', stiffness: 700, damping: 30 }}
                             style={{ left: maintenanceStatus === 'ON' ? 'calc(4rem - 1.75rem)' : '0.25rem' }}
                         >
-                            <MaintenanceSpinner isAnimating={isMaintenanceToggling} />
+                            <MaintenanceSpinner isToggling={isMaintenanceToggling} />
                         </motion.div>
                         <AnimatePresence>
                             {maintenanceStatus === 'ON' && (
