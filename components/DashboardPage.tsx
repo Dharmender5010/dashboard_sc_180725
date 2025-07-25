@@ -89,6 +89,15 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
     const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [formModalUrl, setFormModalUrl] = useState<string | null>(null);
+    const [clickedLeadInfo, setClickedLeadInfo] = useState<Map<string, { timestamp: number }>>(() => {
+        try {
+            const item = sessionStorage.getItem('clickedLeadInfo');
+            // Stored as an array of [key, value] pairs
+            return item ? new Map(JSON.parse(item)) : new Map();
+        } catch {
+            return new Map();
+        }
+    });
 
 
     const handleFilterChange = (filterName: keyof typeof filters, value: string) => {
@@ -108,13 +117,19 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
         }
     };
     
-    const handleOpenFormModal = (url: string) => {
+    const handleOpenFormModal = (url: string, leadId: string) => {
         if (url.includes('/viewform')) {
             const embedUrl = url.replace('/viewform', '/viewform?embedded=true');
             setFormModalUrl(embedUrl);
         } else {
             setFormModalUrl(url);
         }
+        setClickedLeadInfo(prev => {
+            const newMap = new Map(prev);
+            newMap.set(leadId, { timestamp: Date.now() });
+            sessionStorage.setItem('clickedLeadInfo', JSON.stringify(Array.from(newMap.entries())));
+            return newMap;
+        });
     };
 
     const handleCloseFormModal = () => {
@@ -358,6 +373,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
                         <DataTable 
                             data={filteredData} 
                             onOpenFormModal={handleOpenFormModal}
+                            clickedLeadInfo={clickedLeadInfo}
                         />
                     </motion.div>
 
