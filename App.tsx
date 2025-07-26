@@ -3,12 +3,12 @@ import Joyride, { CallBackProps, STATUS, Step, EVENTS } from 'react-joyride';
 import { AnimatePresence } from 'framer-motion';
 import { LoginPage } from './components/LoginPage';
 import { DashboardPage } from './components/DashboardPage';
-import { fetchAndParseData, fetchUserPermissions, fetchPerformanceData } from './services/googleSheetService';
+import { fetchAndParseData, fetchUserPermissions, fetchPerformanceData, fetchTodaysTaskData } from './services/googleSheetService';
 import { fetchHelpTickets, updateTicketStatus, updateMaintenanceStatus, DEVELOPER_EMAIL } from './services/helpService';
 import { loginSteps, dashboardStepsAdmin, dashboardStepsUser } from './services/tourService';
 import { tts } from './services/ttsService';
 import { TourTooltip } from './components/TourTooltip';
-import { FollowUpData, UserPermission, PerformanceData, HelpTicket } from './types';
+import { FollowUpData, UserPermission, PerformanceData, HelpTicket, TodaysTaskData } from './types';
 import { LoadingComponent } from './components/LoadingComponent';
 import Screensaver from './components/Screensaver';
 import { MaintenancePage } from './components/MaintenancePage';
@@ -32,6 +32,7 @@ const App: React.FC = () => {
 
     const [allData, setAllData] = useState<FollowUpData[]>([]);
     const [performanceData, setPerformanceData] = useState<PerformanceData[]>([]);
+    const [todaysTaskData, setTodaysTaskData] = useState<TodaysTaskData[]>([]);
     const [userPermissions, setUserPermissions] = useState<UserPermission[]>([]);
     const [helpTickets, setHelpTickets] = useState<HelpTicket[]>([]);
     const [scUserEmails, setScUserEmails] = useState<string[]>([]);
@@ -102,14 +103,16 @@ const App: React.FC = () => {
         setIsLoading(true);
         setError(null);
         try {
-            const [data, permissions, perfData] = await Promise.all([
+            const [data, permissions, perfData, tasks] = await Promise.all([
                 fetchAndParseData(),
                 fetchUserPermissions(),
-                fetchPerformanceData()
+                fetchPerformanceData(),
+                fetchTodaysTaskData(),
             ]);
             setAllData(data);
             setUserPermissions(permissions);
             setPerformanceData(perfData);
+            setTodaysTaskData(tasks);
             setLastUpdated(new Date());
 
             const maintenanceSetting = permissions.find(p => p.userType === 'Maintenance' && p.email === 'status');
@@ -455,6 +458,7 @@ const App: React.FC = () => {
                     scUserEmails={scUserEmails}
                     data={allData}
                     performanceData={performanceData}
+                    todaysTaskData={todaysTaskData}
                     helpTickets={helpTickets}
                     onUpdateTicket={handleUpdateTicket}
                     onLogout={handleLogout}
