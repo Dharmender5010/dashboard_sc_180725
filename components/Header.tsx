@@ -92,7 +92,7 @@
 
 
     return (
-      <header className="bg-white shadow-sm p-4 flex justify-between items-center sticky top-0 z-10">
+      <header className="bg-white shadow-sm py-2 px-4 flex justify-between items-center sticky top-0 z-10">
         <div id="header-title">
           <h1 className="text-xl font-bold text-gray-800 tracking-tight">SC-Dashboard FollowUps after Meeting</h1>
           <p className="text-sm text-gray-500 tracking-wide">{formatDateTime(currentDateTime)}</p>
@@ -151,7 +151,7 @@
             </div>
 
             {isDeveloper && (
-              <div className={`flex flex-col items-center justify-center bg-gray-100 p-2 rounded-lg h-full transition-colors duration-300 ${maintenanceStatus === 'ON' ? 'blinking-border' : 'border-2 border-status-success'}`}>
+              <div className={`flex flex-col items-center justify-center bg-gray-100 p-2 rounded-lg transition-colors duration-300 ${maintenanceStatus === 'ON' ? 'blinking-border' : 'border-2 border-status-success'}`}>
                 <label
                     htmlFor="maintenance-toggle"
                     className="relative inline-flex items-center cursor-pointer group"
