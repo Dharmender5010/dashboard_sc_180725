@@ -5,7 +5,6 @@ const PARTICLE_COLOR = 'rgba(79, 70, 229, 0.7)'; // brand-primary with opacity
 const LINE_RGB = '150, 150, 150'; // light gray
 const PARTICLE_COUNT = 80; // Reduced for performance on lower-end devices
 const MAX_LINE_DISTANCE = 130;
-const MOUSE_INTERACTION_RADIUS = 180;
 
 class Particle {
   x: number;
@@ -54,7 +53,6 @@ export const PlexusAnimation: React.FC = () => {
 
     let animationFrameId: number;
     let particles: Particle[] = [];
-    const mouse = { x: -1000, y: -1000 };
 
     const resizeCanvas = () => {
       const parent = canvas.parentElement;
@@ -73,17 +71,6 @@ export const PlexusAnimation: React.FC = () => {
         }
       }
     };
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = canvas.getBoundingClientRect();
-      mouse.x = e.clientX - rect.left;
-      mouse.y = e.clientY - rect.top;
-    };
-    
-    const handleMouseOut = () => {
-      mouse.x = -1000;
-      mouse.y = -1000;
-    }
 
     const animate = () => {
       if(!ctx) return;
@@ -109,18 +96,6 @@ export const PlexusAnimation: React.FC = () => {
                 ctx.stroke();
             }
         }
-        
-        // Draw lines to mouse
-        const distToMouse = Math.sqrt((p1.x - mouse.x) ** 2 + (p1.y - mouse.y) ** 2);
-        if (distToMouse < MOUSE_INTERACTION_RADIUS) {
-            ctx.beginPath();
-            ctx.moveTo(p1.x, p1.y);
-            ctx.lineTo(mouse.x, mouse.y);
-            const opacity = 1 - distToMouse / MOUSE_INTERACTION_RADIUS;
-            ctx.strokeStyle = `rgba(${LINE_RGB}, ${opacity * 0.8})`; // Make mouse lines more prominent
-            ctx.lineWidth = 1;
-            ctx.stroke();
-        }
       }
       
       animationFrameId = requestAnimationFrame(animate);
@@ -130,14 +105,10 @@ export const PlexusAnimation: React.FC = () => {
     animate();
     
     window.addEventListener('resize', resizeCanvas);
-    canvas.addEventListener('mousemove', handleMouseMove);
-    canvas.addEventListener('mouseout', handleMouseOut);
 
     return () => {
       cancelAnimationFrame(animationFrameId);
       window.removeEventListener('resize', resizeCanvas);
-      canvas.removeEventListener('mousemove', handleMouseMove);
-      canvas.removeEventListener('mouseout', handleMouseOut);
     };
 
   }, []);
