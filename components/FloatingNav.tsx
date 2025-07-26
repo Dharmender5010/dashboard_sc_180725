@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProMenuIcon, QuestionMarkCircleIcon, SparklesIcon } from './icons';
@@ -59,7 +60,13 @@ export const FloatingNav: React.FC<FloatingNavProps> = ({ onStartTour, onOpenHel
                         exit="closed"
                     >
                         {navItems.map(item => (
-                             <motion.li key={item.label} variants={itemVariants}>
+                             <motion.li
+                                key={item.label}
+                                variants={itemVariants}
+                                whileHover={{ scale: 1.05 }}
+                                transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                                style={{ originX: 1 }}
+                             >
                                 <button
                                     id={item.id}
                                     onClick={() => {
@@ -83,17 +90,35 @@ export const FloatingNav: React.FC<FloatingNavProps> = ({ onStartTour, onOpenHel
                     </motion.ul>
                 )}
             </AnimatePresence>
-            <motion.button
-                id="floating-nav-toggle"
-                onClick={() => setIsOpen(!isOpen)}
-                className="w-12 h-12 bg-brand-primary rounded-full flex items-center justify-center text-white shadow-xl hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-dark"
-                aria-label="Toggle navigation menu"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-                transition={{ type: "spring", stiffness: 400, damping: 17 }}
-            >
-                <ProMenuIcon isOpen={isOpen} />
-            </motion.button>
+            <div className="relative flex justify-center items-center">
+                {!isOpen && (
+                    <motion.div
+                        className="absolute w-12 h-12 bg-brand-primary rounded-full"
+                        aria-hidden="true"
+                        animate={{
+                            scale: [1, 1.6, 1],
+                            opacity: [0.7, 0, 0.7],
+                        }}
+                        transition={{
+                            duration: 2.5,
+                            repeat: Infinity,
+                            ease: "easeInOut",
+                            repeatDelay: 2,
+                        }}
+                    />
+                )}
+                <motion.button
+                    id="floating-nav-toggle"
+                    onClick={() => setIsOpen(!isOpen)}
+                    className="relative w-12 h-12 bg-brand-primary rounded-full flex items-center justify-center text-white shadow-xl hover:bg-brand-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-dark"
+                    aria-label="Toggle navigation menu"
+                    whileHover={{ scale: 1.1 }}
+                    whileTap={{ scale: 0.95 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                >
+                    <ProMenuIcon isOpen={isOpen} />
+                </motion.button>
+            </div>
         </div>
     );
 };
