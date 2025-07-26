@@ -1,4 +1,4 @@
-import { FollowUpData, UserPermission, PerformanceData } from '../types';
+import { FollowUpData, UserPermission, PerformanceData, TodaysTaskData } from '../types';
 
 const SHEET_ID = '1lpb27xNoG6eTeskB1ATT36zxjgV2QLKQjNWruhhmDhY';
 const SHEET_NAME = 'SC4&6_Dashboard_Data';
@@ -174,6 +174,64 @@ export const fetchPerformanceData = async (): Promise<PerformanceData[]> => {
 
     } catch (error) {
         console.error("Failed to fetch or parse Google Sheet performance data:", error);
+        throw error;
+    }
+};
+
+const TODAYS_TASK_SHEET_NAME = 'Today_Completed_Task';
+const TODAYS_TASK_SHEET_RANGE = 'A1:K';
+const TODAYS_TASK_GOOGLE_SHEET_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(TODAYS_TASK_SHEET_NAME)}&range=${TODAYS_TASK_SHEET_RANGE}`;
+
+export const fetchTodaysTaskData = async (): Promise<TodaysTaskData[]> => {
+    try {
+        const response = await fetch(TODAYS_TASK_GOOGLE_SHEET_URL);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const text = await response.text();
+        
+        const startIndex = text.indexOf('(');
+        const endIndex = text.lastIndexOf(')');
+
+        if (startIndex === -1 || endIndex === -1) {
+            throw new Error('Invalid Google Sheets response format for Today\'s Tasks. Cannot find JSONP wrapper.');
+        }
+
+        const jsonText = text.substring(startIndex + 1, endIndex);
+        const result = JSON.parse(jsonText);
+        
+        if (result.status === 'error') {
+            throw new Error(result.errors.map((e: { detailed_message: string }) => e.detailed_message).join(', '));
+        }
+        
+        const rows = result.table.rows;
+        
+        if (!rows || rows.length === 0) {
+            return [];
+        }
+
+        const data: TodaysTaskData[] = rows.map((row: { c: ({ v: any; f?: string; })[] }) => {
+            const cells = row.c;
+            // A: leadId, B: personName, C: mobile, D: stepCode, E: planned, F: actual, G: status, H: remark, I: scEmail, J: doer, K: category
+            return {
+                leadId: String(cells[0]?.v ?? '').trim(),
+                personName: String(cells[1]?.v ?? '').trim(),
+                mobile: cells[2]?.v ?? null,
+                stepCode: String(cells[3]?.v ?? '').trim(),
+                planned: String(cells[4]?.f ?? cells[4]?.v ?? '').trim(),
+                actual: String(cells[5]?.f ?? cells[5]?.v ?? '').trim(),
+                status: String(cells[6]?.v ?? '').trim(),
+                remark: String(cells[7]?.v ?? '').trim(),
+                scEmail: String(cells[8]?.v ?? '').trim(),
+                doer: String(cells[9]?.v ?? '').trim(),
+                category: String(cells[10]?.v ?? '').trim(),
+            };
+        });
+        
+        return data.slice(1); // Remove header row
+
+    } catch (error) {
+        console.error("Failed to fetch or parse Today's Completed Task data:", error);
         throw error;
     }
 };
