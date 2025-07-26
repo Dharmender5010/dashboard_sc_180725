@@ -51,3 +51,17 @@ export interface ClickInfo {
     timestamp: number;
     date: string; // Format: "YYYY-MM-DD"
 }
+
+export interface TodaysTaskData {
+  leadId: string;
+  personName: string;
+  mobile: number | null;
+  stepCode: string;
+  planned: string;
+  actual: string;
+  status: string;
+  remark: string;
+  scEmail: string;
+  doer: string;
+  category: string;
+}
