@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion, Variants } from 'framer-motion';
 
@@ -6,6 +5,7 @@ interface PerformanceCardProps {
   title: string;
   value: string | number;
   icon: React.ReactNode;
+  onClick?: () => void;
 }
 
 const cardVariants: Variants = {
@@ -46,14 +46,15 @@ const shineVariants: Variants = {
     }
 }
 
-export const PerformanceCard: React.FC<PerformanceCardProps> = ({ title, value, icon }) => {
+export const PerformanceCard: React.FC<PerformanceCardProps> = ({ title, value, icon, onClick }) => {
   return (
     <motion.div 
-      className="bg-white rounded-xl shadow-md px-4 py-6 flex items-center space-x-3 border-l-4 border-brand-primary h-full overflow-hidden relative cursor-pointer"
+      className={`bg-white rounded-xl shadow-md px-4 py-6 flex items-center space-x-3 border-l-4 border-brand-primary h-full overflow-hidden relative ${onClick ? 'cursor-pointer' : ''}`}
       initial="rest"
       whileHover="hover"
       animate="rest"
       variants={cardVariants}
+      onClick={onClick}
     >
         {/* Shine effect element */}
         <motion.div
