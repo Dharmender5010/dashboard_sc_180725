@@ -11,6 +11,7 @@ interface PerformanceCardsProps {
     performanceData: PerformanceData[];
     maintenanceStatus: 'ON' | 'OFF';
     countdown: number;
+    onCardClick: (category: string) => void;
 }
 
 const initialSummary = {
@@ -97,7 +98,7 @@ const CircularTimer: React.FC<CircularTimerProps> = ({ value, maxValue, label, c
     );
 };
 
-export const PerformanceCards: React.FC<PerformanceCardsProps> = ({ userRole, userEmail, selectedScEmail, performanceData, maintenanceStatus, countdown }) => {
+export const PerformanceCards: React.FC<PerformanceCardsProps> = ({ userRole, userEmail, selectedScEmail, performanceData, maintenanceStatus, countdown, onCardClick }) => {
 
     const summaryData = useMemo(() => {
         if (!performanceData || performanceData.length === 0) {
@@ -182,7 +183,16 @@ export const PerformanceCards: React.FC<PerformanceCardsProps> = ({ userRole, us
             >
                 {cards.map(card => (
                     <motion.div key={card.title} variants={item} className="h-full">
-                        <PerformanceCard title={card.title} value={card.value} icon={card.icon} />
+                         <PerformanceCard 
+                            title={card.title} 
+                            value={card.value} 
+                            icon={card.icon} 
+                            onClick={
+                                ['Calls Made', 'Meeting Fixed', 'FollowUps Done'].includes(card.title) 
+                                ? () => onCardClick(card.title) 
+                                : undefined
+                            }
+                        />
                     </motion.div>
                 ))}
             </motion.div>
