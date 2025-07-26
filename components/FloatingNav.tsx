@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ProMenuIcon, QuestionMarkCircleIcon, SparklesIcon } from './icons';
 
@@ -42,14 +42,35 @@ const itemVariants = {
 
 export const FloatingNav: React.FC<FloatingNavProps> = ({ onStartTour, onOpenHelpModal }) => {
     const [isOpen, setIsOpen] = useState(false);
+    const navRef = useRef<HTMLDivElement>(null);
 
     const navItems = [
         { label: 'Take a Tour', icon: <SparklesIcon className="h-4 w-4" />, action: onStartTour, id: 'floating-nav-tour' },
         { label: 'Need Help?', icon: <QuestionMarkCircleIcon className="h-4 w-4" />, action: onOpenHelpModal, id: 'floating-nav-help' }
     ];
 
+    // Effect to handle clicks outside the component
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            // If the menu is open and the click is outside the nav container
+            if (navRef.current && !navRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+
+        // Add event listener when the menu is open
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        // Cleanup: remove event listener
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen]); // Re-run effect when `isOpen` changes
+
     return (
-        <div className="fixed bottom-4 right-4 z-50">
+        <div ref={navRef} className="fixed bottom-4 right-4 z-50">
             <AnimatePresence>
                 {isOpen && (
                     <motion.ul
