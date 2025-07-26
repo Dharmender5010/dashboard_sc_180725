@@ -2,7 +2,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { motion, Variants } from 'framer-motion';
-import { FollowUpData, PerformanceData, HelpTicket, ClickInfo } from '../types';
+import { FollowUpData, PerformanceData, HelpTicket, ClickInfo, TodaysTaskData } from '../types';
 import { Header } from './Header';
 import { BarChartComponent } from './BarChartComponent';
 import { LineChartComponent } from './LineChartComponent';
@@ -15,6 +15,7 @@ import { AnimatedBackground } from './AnimatedBackground';
 import { HelpModal } from './HelpModal';
 import { NotificationsPanel } from './NotificationsPanel';
 import { FormModal } from './FormModal';
+import { ReportModal } from './ReportModal';
 import { FloatingNav } from './FloatingNav';
 
 interface DashboardPageProps {
@@ -24,6 +25,7 @@ interface DashboardPageProps {
   scUserEmails: string[];
   data: FollowUpData[];
   performanceData: PerformanceData[];
+  todaysTaskData: TodaysTaskData[];
   helpTickets: HelpTicket[];
   onUpdateTicket: (ticketId: string, status: string) => Promise<void>;
   onLogout: () => void;
@@ -81,7 +83,7 @@ const itemVariants: Variants = {
     },
 };
 
-export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userName, userRole, scUserEmails, data, performanceData, helpTickets, onUpdateTicket, onLogout, onRefresh, isRefreshing, lastUpdated, onStartTour, maintenanceStatus, onUpdateMaintenanceStatus, countdown, isMaintenanceToggling }) => {
+export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userName, userRole, scUserEmails, data, performanceData, todaysTaskData, helpTickets, onUpdateTicket, onLogout, onRefresh, isRefreshing, lastUpdated, onStartTour, maintenanceStatus, onUpdateMaintenanceStatus, countdown, isMaintenanceToggling }) => {
     const [filters, setFilters] = useState({ stepCode: '', mobile: '', leadId: '' });
     const [searchTerm, setSearchTerm] = useState('');
     const [dateRange, setDateRange] = useState<{ start: Date | null, end: Date | null }>({ start: null, end: null });
@@ -89,6 +91,12 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
     const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
     const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
     const [formModalUrl, setFormModalUrl] = useState<string | null>(null);
+    const [reportModalState, setReportModalState] = useState<{
+        isOpen: boolean;
+        title: string;
+        data: TodaysTaskData[];
+    }>({ isOpen: false, title: '', data: [] });
+
     const [clickedLeadInfo, setClickedLeadInfo] = useState<Map<string, ClickInfo>>(() => {
         try {
             const item = sessionStorage.getItem('clickedLeadInfo');
@@ -155,6 +163,27 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
     const handleCloseFormModal = () => {
         setFormModalUrl(null);
         onRefresh(); // Refresh data automatically after user action
+    };
+
+    const handleCardClick = (category: string) => {
+        if (!['Calls Made', 'Meeting Fixed', 'FollowUps Done'].includes(category)) return;
+
+        let filteredTasks = todaysTaskData.filter(task => task.category === category);
+
+        if (userRole === 'User') {
+            // For 'User' role, always filter by their own email.
+            filteredTasks = filteredTasks.filter(task => task.scEmail.toLowerCase() === userEmail.toLowerCase());
+        } else if (userRole === 'Admin' && selectedScEmail) {
+            // For 'Admin' role, if an SC is selected, filter by that SC's email.
+            // Otherwise (Admin without selected SC), show all tasks for the category.
+            filteredTasks = filteredTasks.filter(task => task.scEmail.toLowerCase() === selectedScEmail.toLowerCase());
+        }
+
+        setReportModalState({
+            isOpen: true,
+            title: `${category} Report`,
+            data: filteredTasks,
+        });
     };
 
     const baseData = useMemo(() => {
@@ -272,6 +301,13 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
                 onClose={handleCloseFormModal}
                 url={formModalUrl}
             />
+            <ReportModal
+                isOpen={reportModalState.isOpen}
+                onClose={() => setReportModalState(prev => ({ ...prev, isOpen: false, data: [] }))}
+                title={reportModalState.title}
+                data={reportModalState.data}
+                userRole={userRole}
+            />
             <NotificationsPanel
                 isOpen={isNotificationsOpen}
                 onClose={() => setIsNotificationsOpen(false)}
@@ -312,6 +348,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
                             performanceData={performanceData}
                             maintenanceStatus={maintenanceStatus}
                             countdown={countdown}
+                            onCardClick={handleCardClick}
                         />
                     </motion.div>
                     
@@ -370,6 +407,7 @@ export const DashboardPage: React.FC<DashboardPageProps> = ({ userEmail, userNam
                                     placeholder="Search by Lead ID, Step Code, Mobile, or Sales Person..."
                                     className="block w-full pl-12 pr-4 py-3.5 bg-white border-2 border-brand-primary text-gray-900 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-dark placeholder:text-gray-500 transition-colors duration-300 sm:text-sm"
                                     id="global-search-input"
+                                    autoComplete="off"
                                 />
                             </div>
                             <button
