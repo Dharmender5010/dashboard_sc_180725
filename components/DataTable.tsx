@@ -1,7 +1,4 @@
 
-
-
-
 import React, { useState, useMemo, useEffect, useCallback, useRef } from 'react';
 import { FollowUpData, ClickInfo } from '../types';
 import { ArrowUpDownIcon, CheckCircleIcon } from './icons';
@@ -177,7 +174,7 @@ export const DataTable: React.FC<DataTableProps> = ({ data, onOpenFormModal, cli
     return (
         <div className="bg-white rounded-lg shadow-xl overflow-hidden flex flex-col">
             <div className="overflow-auto max-h-[65vh]">
-                <table className="w-full text-sm text-left text-gray-500" style={{ tableLayout: 'fixed' }}>
+                <table className="w-full text-sm text-left text-gray-800" style={{ tableLayout: 'fixed' }}>
                     <colgroup>
                         {headers.map(header => (
                             <col key={header.key} style={{ width: `${columnWidths[header.key] || 100}px` }} />
