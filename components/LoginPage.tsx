@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence, Variants } from 'framer-motion';
 import { ExclamationCircleIcon, AtSymbolIcon, KeyIcon, XMarkIcon } from './icons';
-import { AnimatedBackground } from './AnimatedBackground';
+import { PlexusAnimation } from './PlexusAnimation';
 import { HelpModal } from './HelpModal';
 import { sendOtpRequest, verifyOtpRequest } from '../services/otpService';
 import { DEVELOPER_EMAIL } from '../services/helpService';
@@ -244,8 +244,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
 
   return (
     <div className="min-h-screen bg-gray-100 flex font-sans relative overflow-hidden">
-      <AnimatedBackground />
-
       <p className="absolute top-4 right-4 text-xs font-semibold text-gray-500 z-20">Version 1.1.5</p>
 
       <FloatingNav 
@@ -268,9 +266,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
       </div>
 
       {/* Right side with form */}
-      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24 z-10 relative">
+      <div className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24 z-10 relative overflow-hidden">
+        <PlexusAnimation />
         <motion.div 
-            className="mx-auto w-full max-w-sm text-center"
+            className="relative z-10 mx-auto w-full max-w-sm text-center bg-white/80 backdrop-blur-md p-8 sm:p-10 rounded-2xl shadow-2xl border border-white/20"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -400,7 +399,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
                     <div className="w-full border-t border-gray-300" />
                 </div>
                 <div className="relative flex justify-center text-sm">
-                    <span className="bg-gray-100 px-2 text-gray-500 font-medium">OR</span>
+                    <span className="bg-white px-2 text-gray-500 font-medium">OR</span>
                 </div>
             </motion.div>
 
@@ -426,7 +425,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLogin, error, onStartTou
             <p className="mt-8 text-center text-xs text-gray-500">&copy;2025 Sales Dashboard. All rights reserved.</p>
           </div>
         </motion.div>
-        <footer className="absolute bottom-4 left-0 right-0 text-center text-gray-500 text-xs">
+        <footer className="absolute bottom-4 left-0 right-0 text-center text-gray-500 text-xs z-10">
             <p className="font-semibold">Developed by:- Dharmender</p>
         </footer>
       </div>
